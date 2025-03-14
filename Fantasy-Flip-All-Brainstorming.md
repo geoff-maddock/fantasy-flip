@@ -7,8 +7,7 @@ This is all the notes and brainstorming for the game including ideas that have b
 A flip and write game that uses a deck (or decks) of cards for the randomization mechanism.  Players build a party/adventurer and expore a dungeon for gold, experience and renoun
  
 ## OBJECTIVE
-Each player is an adventurer seeking their fame and fortune in a fantasy land of danger and magic.  Flip cards to improve your skills or adventure in different lands,
-gaining adventure, future, spirit and renown
+Each player is an adventurer seeking their fame and fortune in a fantasy land of danger and magic.  Flip cards to improve your skills or adventure in different lands, gaining adventure, future, spirit and renown.
 
 ## BASICS
 - 1-n players
@@ -98,6 +97,26 @@ Clubs (black) - defense / blunt offense / building
 Spades (black) - attack / sharp offense / traveling
 Hearts (red) - health / charisma
 Diamonds (red) - magick / wealth
+
+
+## Adventure Boards
+Different small boards that all players can interact with.
+Forrest
+Dungeon
+Tower
+Swamp
+Cave
+Temple
+City
+
+Temple
+Stables
+Candlemaker
+Tavern
+Guild
+Blacksmith
+
+
 
 ## RULES & SYSTEMS
 
@@ -266,3 +285,14 @@ file:///Z:/games/boardgames/Rolling%20Realms%20Redux/RRRedux_Compendium_r11.pdf
 	- Abilities - tokens or keywords that allow the player certain action or access
 	- Virtues - a di-pole rating that defines players penalty, bonus or access to certain things, but can change
 	- Scoring - measures the players success in different areas gained by completing quests, collecting items, visiting locations, etc.  typically only goes up
+
+- Grid on a player board:  Draw a sigil, house, magic, herald, religion.  Based on size and number of shapes, gain different bonuses
+- Inspiration for maps: https://www.youtube.com/watch?v=q-WOSGi2je8
+- create a set of "action" icons that are recognizable across boards.  different player abilities will modify these action types:  ex: gather, fight, research, disarm, craft, enchant, and prevent having to write out long descriptions on a board.
+    - the explanations will be in a manual or quick rules helper sheet
+- https://chatgpt.com/c/67a692c5-2298-8002-91a0-47fbfe011e88
+
+
+Sections of a player board
+
+Sections of an adventure board
