@@ -98,7 +98,6 @@ Spades (black) - attack / sharp offense / traveling
 Hearts (red) - health / charisma
 Diamonds (red) - magick / wealth
 
-
 ## Adventure Boards
 Different small boards that all players can interact with.
 Forrest
@@ -117,7 +116,6 @@ Guild
 Blacksmith
 
 
-
 ## RULES & SYSTEMS
 
 ### How to set up the game?
@@ -128,7 +126,8 @@ You can randomly choose who goes first, but without any other method - pick the 
 ### What happens in each round?
 
 ### How does the game end?
-At the end of scoring at the end of the 3rd round
+- At the end of scoring at the end of the 3rd round
+- When the player has run out of cards in their deck
 
 #### Action Types
 
