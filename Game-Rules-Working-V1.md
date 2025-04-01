@@ -46,11 +46,12 @@ Alignment - how far into virtue or vice the player goes
 The player board is divided into various segments
 
 On the left is the "character", and the player can either play as an "adventurer" or one of the classes:
-- Druid  - explore the forrest
-- Rogue  - steal from other players, avoid traps
-- Paladin  - absorb damage with armor
 - Alchemist - push your luck to create magic
-- Sorceror - use mana to achieve magical results
+- Bard - use song and charm to influence others
+- Druid - commune with nature to gain favor
+- Necromancer - use mana to achieve magical results
+- Paladin  - absorb damage with armor
+- Ranger  - use nature to track and find hidden paths
 
 - group into 'good/evil' and 'neutral/good or evil'
 - what stats apply to each?
@@ -64,6 +65,21 @@ Agility - thresholds effect movement, ability to avoid hits
 Wisdom - interactions with npcs, white magics
 Spirit - black magics, interaction with nature
 
+Alignment - how far into good or evil the player is, effects certain actions and thresholds, 9 positions, starting neutral
+
+##### Resources
+- Gold - used to buy items, and pay for services
+- Mana - used to cast spells, and commune with nature
+- Health - if this reaches zero the player goes to purgatory and must pay a penalty to return
+- XP - used to increase stats and gain new skills
+
+- Energies
+	- Yellow
+	- Orange
+	- Red
+	- Purple
+	- Blue
+	- Green 
 
 ##### Scoring tracks
 EXPLORE - visiting a breadth of locations and completing quests
@@ -116,7 +132,11 @@ These are the different energies that players can gain and spend to take actions
 - Green - nature, gathered in the forrest and from specific relics.  used to heal
 
 ## Adventure Boards
+
+
 Different small boards that all players can interact with.
+
+
 Forrest
 Dungeon
 Tower
