@@ -45,6 +45,8 @@ Alignment - how far into virtue or vice the player goes
 #### Player board
 The player board is divided into various segments
 
+The player has four basic stats that are assigned at the start of the game and can be improved during the game.  These stats are Level, Might, Agility, Wisdom and Spirit.
+
 On the left is the "character", and the player can either play as an "adventurer" or one of the classes:
 - Druid  - explore the forrest
 - Rogue  - steal from other players, avoid traps
@@ -106,8 +108,6 @@ Diamonds (red) - magick / wealth
 
 ## Energies
 These are the different energies that players can gain and spend to take actions, score and defeat specific obstacles
-
-
 - Yellow
 - Orange
 - Red
@@ -131,3 +131,11 @@ Candlemaker
 Tavern
 Guild
 Blacksmith
+
+## Mechanics
+- Flip cards, use symbols to take actions
+- Use wet erase markers to mark your board, gaining and spending resources, enhancing your character, activating skills, and tracking progress
+- Push your luck - take more actions, but risk losing what you've gained
+- Set collection - gather items and artifacts to gain renown
+- Player interaction - steal from other players, block their actions, or help them for mutual benefit
+- Multiple paths to victory - focus on different aspects of the game to score points in various categories
