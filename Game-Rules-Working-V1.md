@@ -132,10 +132,7 @@ These are the different energies that players can gain and spend to take actions
 - Green - nature, gathered in the forrest and from specific relics.  used to heal
 
 ## Adventure Boards
-
-
 Different small boards that all players can interact with.
-
 
 Forrest
 Dungeon
@@ -150,6 +147,7 @@ Stables
 Candlemaker
 Tavern
 Guild
+  IMPROVE A CLASS ABILITY
 Blacksmith
 
 ## Mechanics
@@ -159,3 +157,40 @@ Blacksmith
 - Set collection - gather items and artifacts to gain renown
 - Player interaction - steal from other players, block their actions, or help them for mutual benefit
 - Multiple paths to victory - focus on different aspects of the game to score points in various categories
+
+## TYPES OF GAME SYSTEMS
+- Cards
+  - Player Deck
+    - 52 card deck
+	- when out of cards, the game ends
+	- each player has their own deck
+  - Adventure Desk
+    - 52 card deck
+	- collective deck where players draw from to take actions in adventure area
+  - Discard Pile
+    - when cards are used, they go to the discard pile, and when the adventure deck runs out, the discard pile is shuffled to create a new adventure deck
+  - Graveyard
+    - when cards are used on a turn, they go to the graveyard and can't typically be regained without a special ability
+
+  - Attributes
+    - Values that are generally static, may be improved, and are used as a value to add to flips or as a threshold for actions
+	Examples: Brawn, Agility, Wisdom, Spirit
+  - Resources 
+    - Values that are gained and spent throughout the game, and are used to take actions, or as a value to add to flips or as a threshold for actions
+	Examples: Gold, Mana, Health, XP
+  - Scoring Tracks
+    - Values that are gained throughout the game, and are used to determine the winner at the end of the game.  Hitting certain thresholds may also trigger special abilities or actions
+	Examples: Adventure, Fortune, Soul, Renown
+  - Items
+	- One time use or permanent bonuses that can be bought with gold, or gained by completing certain actions.  
+	Examples: War Hammer, Dagger, Talisman
+  
+  - Mini Game Mechanisms
+	- These are small games that can be triggered by certain actions, and have their own rules and mechanics.  They can be used to determine the outcome of certain actions, or as a way to gain resources or score.
+
+	- Class abilities:
+	  - Each class has special abilities that you can "train" on your turn using XP, Mana, Gold and card draws.  They lead to scoring or improved reactions to adventure scenarios.
+
+		Adventure locations
+		- Cave: to enter the cave, you need a torch or a diamond card.  you can then flip one card per agility to move on the track.
+		you gain any thing you pass plus what you land on.  if you land on a pit, you lose health.
