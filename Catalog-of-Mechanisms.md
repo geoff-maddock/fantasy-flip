@@ -102,3 +102,14 @@ Can always spend lower (or higher) cards to make small gains in gold, XP or mana
 --- 
 # SCORING
 
+
+
+--- 
+Compare how Hadrian's wall uses thresholds, resources and abilities to create a sense of progression and challenge.
+
+Resources (bricks)
+Soldiers
+Builders
+Sevants / Priests
+Civilians 
+Cards that grant resources, creates threats, used as random values for mini games

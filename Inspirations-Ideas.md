@@ -9,3 +9,5 @@ The main mechanisms of the game are:
 - Spending resources to take actions on the player board or adventure board, or to transform card draws
 - Scoring points based on the results of different actions taken
  
+
+---

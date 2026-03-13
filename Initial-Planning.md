@@ -1,0 +1,4 @@
+- create a very simple version - closer to the inspirations
+- create a complex version - refine all the different mechanisms
+- Build the best high level docs for the project that are inclusive of all features for A version (ie: no unknowns, but maybe missing some things that the brainstorming doc has)
+- High level PRD for Fantasy Flip - what are the INSPIRATIONS/IDEAS and what are the CONCRETE REQUIREMENTS
