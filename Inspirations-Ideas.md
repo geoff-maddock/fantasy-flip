@@ -8,3 +8,6 @@ The main mechanisms of the game are:
 - Activating abilities on the plyer board to take special actions or gain bonuses when interacting with the adventure board
 - Spending resources to take actions on the player board or adventure board, or to transform card draws
 - Scoring points based on the results of different actions taken
+ 
+
+---
