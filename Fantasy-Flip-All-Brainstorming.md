@@ -295,3 +295,35 @@ file:///Z:/games/boardgames/Rolling%20Realms%20Redux/RRRedux_Compendium_r11.pdf
 Sections of a player board
 
 Sections of an adventure board
+
+----
+# Dungeon Board ideas
+
+# Tower Board ideas
+- Requirements?  Diamond?
+- represents an evil wizard's tower
+- can rescue prisoners for rewards
+- movement mechanism
+	- stairway that you must climb, then you have access to rooms?
+- different floor/room mini game mechanisms
+	- skeleton guards
+	- experiment morgue
+	- sewer pipe
+	- alchemical lab
+	- arcane library
+	- wizard's chamber
+- color energies play here, the red to purple spectrum?
+
+# Forest Board ideas
+
+# City Board ideas
+- Similar to city in flip town where you visit various shops with simple mechanisms
+- Mostly for improving the character? Or using low number cards?
+
+--- 
+# Choices 
+## When spending suits (a type of "worker")
+- Diamonds
+	- Buying items that can be used up
+	- Accessing the wizard's tower
+	- Improving some character types? 
