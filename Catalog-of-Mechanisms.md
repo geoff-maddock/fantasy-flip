@@ -1,31 +1,66 @@
-# ATTRIBUTES
+# Catalog of Mechanisms
+
+## ATTRIBUTES
+- Values the define the character's capabilities and traits, such as Strength, Intelligence, Dexterity, etc.
+- Used for requirements for different actions, as modifiers to tests
 
 Brawn / Strength
 Dexterity / Agility
 Will / Intelligence
 Spirit / Charisma
 
-# RESOURCES
-- Gold
-- XP
-- Mana
-- Health?
+## RESOURCES
+- Things that can be gained and spent to improve skills, attributes or take acti
+- Gold - buy things mainly in city, get access?, gain wealth scoring?
+- XP - improve attributes, gain skills, gain access to new classes, gain access to new locations
+- Mana - case spells for unique effects, drawing more cards, taking additional actions, healing, magic attack, movement
+- Health? - absorbs damage, when below a certain amount, character takes wounds causing deck discards, or scoraing penalties at end of game
+- Food? - take adventure actions?
 
-- Colored Energy?
-- Innocents Rescued?
-- Alignment (Good vs Evil)
-- Wounds?
+- Colored Energy - used to power certain skills, or access certain locations, or take certain actions, or score points at end of game
+- Innocents Rescued - used for scoring 
+- Alignment (Good vs Evil) - impact on certain actions, access to certain locations, scoring at end of game
+- Wounds - if the player does not have armor, wounds cause the player to discard cards and potentially lose stats
 
-# SCORING?
-adventure
-exporation
+## Skills
+- Skills are unlocked abilities that are associated with classes that the player can activate during their turn, such as combat maneuvers, crafting techniques, social interactions, etc.
+
+## Scoring 
+- Scoring is tracked on four tracks, each representing a different aspect of the character's progress and success in the game.
+adventure / exporation
+combat / conquest / champion
+mystery / intrigue / secrets
+social / influence / renown
+
+
+## Actions
+- Any valid play move that the player can take on their turn, such as playing a card, spending resources, exploring a location, etc.
+
+## Requirements
+- Conditions that must be met in order to take certain actions, such as having an attribute of a certain level, or a certain level in a class, but nothing is spent
+
+## Costs
+- Resources that must be spent in order to take certain actions, such as gold, XP, mana, etc.
+
+## Rounds
+- A round begins with all players drawing from their deck, then taking as many actions as they desire based on their cards, skills and resources 
+
+## Campaigns
+- A set of 5 rounds
 
 
 ---
 
 # Suits
+Clubs
+Diamonds
+Hearts
+Spades
 
 # Ranks
+- Numbered: 2-10
+- Face: Jack, Queen, King (10)
+- Ace: 1 or 11  
 
 # DRAW FROM PLAYER DECK
 - gives the player suits (1 of 4 options, 52 out of 52)
@@ -50,34 +85,49 @@ exporation
 - improves character attributes
 - not generally for endgame scoring?
 
-# SPEND GOLD TO BUY ITEMS
 
-# SPEND GOLD TO TAKE CITY ACTION
+## General 
 
-# SPEND GOLD TO TRAIN AT GUILD
+### Draw from the Player Deck to hand
+- The hand is open / placed face up.
 
-# EXPLORE THE DUNGEON
+### Draw from Adventure Deck to location
 
-# EXPLORE THE CAVE
+### Play from hand 
+- Number of playable cards is related to something - default is draw hand of 3, play 2 cards per turn
 
-# DEFEND THE CASTLE
+## Spend XP to Improve Your Character
 
-# EXPLORE THE FOREST
+## 
 
+## Spend Gold to Buy Items
+
+## Spend Gold to Take City Action
+
+# EXPLORE THE TOWER
+## Spend Gold to Train at Guild
+
+## Explore the Dungeon
+
+## Explore the Cave
+
+## Defend the Castle
+
+## Explore the Forest
 - Gather herbs 
 - Hunt animals
 - Discover shrines
 
-# EXPLORE THE TOWER
+## Explore the Tower
 
-# SPEND MANA TO CAST SPELLS
+## Spend Mana to Cast Spells
+
+---
 
 # RESCUE INNOCENTS/LOST SOULS
 
 ---
 # Mini Games
-
-
 
 # CITY ACTIONS
 Can always spend lower (or higher) cards to make small gains in gold, XP or mana.
