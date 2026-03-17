@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" aria-label="Game-style potion icon">
+  <defs>
+    <style>
+      .o { fill: #fff; stroke: #000; stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+      .b { fill: #000; }
+    </style>
+  </defs>
+
+  <!-- cork -->
+  <rect x="48" y="10" width="32" height="18" class="o"/>
+
+  <!-- neck -->
+  <rect x="52" y="28" width="24" height="16" class="o"/>
+
+  <!-- bottle -->
+  <path class="o" d="M52 44
+    L52 50
+    L36 66
+    Q26 76 26 92
+    Q26 110 40 118
+    Q48 122 64 122
+    Q80 122 88 118
+    Q102 110 102 92
+    Q102 76 92 66
+    L76 50
+    L76 44
+    Z"/>
+
+  <!-- liquid -->
+  <path class="b" d="M34 86
+    Q42 80 64 80
+    Q86 80 94 86
+    L94 94
+    Q94 106 85 112
+    Q77 118 64 118
+    Q51 118 43 112
+    Q34 106 34 94
+    Z"/>
+
+  <!-- highlight -->
+  <rect x="42" y="72" width="8" height="18" rx="3" class="b"/>
+  <rect x="48" y="64" width="6" height="6" rx="2" class="b"/>
+
+  <!-- sparkle -->
+  <path d="M90 34 L90 44 M85 39 L95 39" class="o"/>
+  <path d="M102 50 L102 58 M98 54 L106 54" class="o"/>
+
+  <!-- bubble -->
+  <circle cx="78" cy="94" r="4" fill="#fff" stroke="#000" stroke-width="4"/>
+</svg>
