@@ -4,10 +4,10 @@
 - Values the define the character's capabilities and traits, such as Strength, Intelligence, Dexterity, etc.
 - Used for requirements for different actions, as modifiers to tests
 
-Brawn / Strength
-Dexterity / Agility
-Will / Intelligence
-Spirit / Charisma
+Brawn
+Agility
+Spirit
+Mind
 
 ## RESOURCES
 - Things that can be gained and spent to improve skills, attributes or take acti
@@ -98,8 +98,6 @@ Spades
 
 ## Spend XP to Improve Your Character
 
-## 
-
 ## Spend Gold to Buy Items
 
 ## Spend Gold to Take City Action
@@ -108,6 +106,26 @@ Spades
 ## Spend Gold to Train at Guild
 
 ## Explore the Dungeon
+- Move through the maze, encounter monsters, find treasure, rescue innocents, gain XP, gain gold, gain mana, find items
+- Every space you pass over you must engage with 
+- Draw a card to determine the results, which you can use resources to modify 
+- Types:
+    - Discover
+        - Gold
+        - Relic
+        - Food 
+        - Energy
+        - Lost soul - rescue for renown, but you must end your run when you rescure one
+        - Exploration 
+    - Obstacle
+        - Trap - requires a test to avoid, if fail, take a wound, but can continue
+        - Puzzle - requires a test to solve, if fail, cannot pass
+        - Monster - requires a test to defeat, if fail, takes wounds, but can continue
+            - Each zone has a different monster
+                - A: 1 number to beat, 1 gold reward, 1 XP reward / 3
+                - B: 2 number to beat, 2 gold reward, 2 XP reward / 3 / 6 - ex: draw a 5, there is one higher number, but you use the bard's charm to avoid taking a wound, so you still gain the gold and XP
+                - C: 3 number to beat, 3 gold reward, 3 XP reward / 3 / 6 / 9 - ex: draw a 2, but you have 5 strength, and a sword +2, for a total of 9, 0 higher numbers, so you defeat the monster, gain the gold and XP
+                - D: 4 number to beat, 4 gold reward, 4 XP reward / 3/ 6 / 9 / 12 - ex: draw a 7, there are two higher numbers, so you take two wounds, still gain the XP, but no gold 
 
 ## Explore the Cave
 
@@ -125,33 +143,75 @@ Spades
 ---
 
 # RESCUE INNOCENTS/LOST SOULS
+- These are lost or captured individuals that the player can rescue during their adventure.  When you rescue an innocent you cannot continue exploring.  If you rescure multiple you can renown and goodness.
 
 ---
 # Mini Games
 
 # CITY ACTIONS
-Can always spend lower (or higher) cards to make small gains in gold, XP or mana.
+- Requires a diamond card to take a city action 
+- Available building depends on rank of card
+- Cemetary A
+- Inn 2 - a place to rest
+- Tavern 3
+- Blacksmith 4
+- Guild 5
+- Market 6
+- Temple 7
+- Stables 8
+- Arena 10
+- Library J
+- Bank Q
+- Castle K
+
 
 # FIGHT MONSTERS
 
 # CLASS ACTIONS
+- Spend XP to gain levelts in a class.  1XP per level
+- Additionally players can visit the guild to train in a class, one level per visit, but the cost increases by 1 gold per visit 
 
-# ALCHEMIS
+# ALCHEMIST
+Major: Mind
+Minor: Spirit
+Weak: Brawn
 
 # BARD
+Major: Spirit
+Minor: Agility
+Weak: Brawn
 
 # DRUID
+Major: Spirit
+Minor: Agility
+Weak: Mind
 
 # KNIGHT
+Major: Brawn
+Minor: Spirit
+Weak: Mind
+
+- Arms & Armor 
+- Oaths (sort of quests?)
+- Stronghold / Castle
+   - After a certain level, spend to unlock scoring
 
 # NECROMANCER
+Major: Mind
+Minor: Spirit
+Weak: Agility
 
 # RANGER
-
+Major: Agility
+Minor: Brawn
+Weak: Spirit
 
 --- 
 # SCORING
-
+Discovery covers travel, exploration, landmarks, special spaces
+Glory covers combat, rescue, quests, heroism
+Arcana covers shrines, spells, relics, magical mastery
+Fortune covers wealth, trade, influence, social status
 
 
 --- 
