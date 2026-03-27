@@ -102,8 +102,14 @@ Spades
 
 ## Spend Gold to Take City Action
 
-# EXPLORE THE TOWER
 ## Spend Gold to Train at Guild
+
+## Expore the Tower
+- Each floor has a different challenge, requirements and rewards, working through different traps and chambers that the wizard uses to test adventurers who seek his knowledge and power.  The higher you go, the greater the rewards, but also the greater the risks.
+- 
+- Floor 1: Skeleton guards - requires a test of strength to defeat, rewards gold and XP
+- Floor 0: The morgue where the misfit experiments are kept, requires a test of spirit to navigate, rewards gold and XP
+
 
 ## Explore the Dungeon
 - Move through the maze, encounter monsters, find treasure, rescue innocents, gain XP, gain gold, gain mana, find items
@@ -136,7 +142,6 @@ Spades
 - Hunt animals
 - Discover shrines
 
-## Explore the Tower
 
 ## Spend Mana to Cast Spells
 
