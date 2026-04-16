@@ -4,10 +4,10 @@
 - Values the define the character's capabilities and traits, such as Strength, Intelligence, Dexterity, etc.
 - Used for requirements for different actions, as modifiers to tests
 
-Brawn
-Agility
-Spirit
-Mind
+- Brawn     relates to physical strength and hand to hand combat
+- Agility   relates to dexterity, speed, and finesse in movement and actions
+- Spirit    relates to willpower, courage, and resistance to mental or magical effects
+- Mind      relates to intelligence, reasoning, and problem solving
 
 ## RESOURCES
 - Things that can be gained and spent to improve skills, attributes or take acti
@@ -15,7 +15,7 @@ Mind
 - XP - improve attributes, gain skills, gain access to new classes, gain access to new locations
 - Mana - case spells for unique effects, drawing more cards, taking additional actions, healing, magic attack, movement
 - Health? - absorbs damage, when below a certain amount, character takes wounds causing deck discards, or scoraing penalties at end of game
-- Food? - take adventure actions?
+- Food/Supplies? - take adventure actions by drawing straight from the adventure deck?
 
 - Colored Energy - used to power certain skills, or access certain locations, or take certain actions, or score points at end of game
 - Innocents Rescued - used for scoring 
@@ -27,11 +27,12 @@ Mind
 
 ## Scoring 
 - Scoring is tracked on four tracks, each representing a different aspect of the character's progress and success in the game.
-adventure / exporation
-combat / conquest / champion
-mystery / intrigue / secrets
-social / influence / renown
 
+- Discovery / Adventure / Exploration
+- Champion / Glory
+- Arcana / Mystery / Intrigue / Secrets / Mystic / Lore
+- Fortune / Wealth / Social / Influence / Renown / Prosperity
+* Note: I would like the attribute and the scoring to start with different letters 
 
 ## Actions
 - Any valid play move that the player can take on their turn, such as playing a card, spending resources, exploring a location, etc.
@@ -47,7 +48,6 @@ social / influence / renown
 
 ## Campaigns
 - A set of 5 rounds
-
 
 ---
 
@@ -82,7 +82,7 @@ Spades
 - adventure deck reshuffles, never runs out
 
 # SPEND XP TO IMPROVE YOUR CHARACTER
-- improves character attributes
+- improves character attributes or unlocks new skills 
 - not generally for endgame scoring?
 
 
@@ -90,11 +90,13 @@ Spades
 
 ### Draw from the Player Deck to hand
 - The hand is open / placed face up.
+- The number of cards drawn is two per turn.  This can be modified by other effects, such as skills, items, or class abilities that allow the player to draw additional cards.
 
 ### Draw from Adventure Deck to location
 
 ### Play from hand 
-- Number of playable cards is related to something - default is draw hand of 3, play 2 cards per turn
+- Play a card from your hand to take an action based on it's suit, rank or other property of the card combined with locations or other game elements that determine what actions are available to the player.
+- The default number of plays is one per turn.  This can be modified by other effects, such as skills, items, or class abilities that allow the player to play additional cards on their turn.
 
 ## Spend XP to Improve Your Character
 
