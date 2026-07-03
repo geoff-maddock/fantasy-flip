@@ -1,0 +1,2767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flip Dungeon — Playtest Prototype v0.3</title>
+<style>
+  :root{
+    --table:#171310;
+    --parch:#eee3c8;
+    --parch2:#e4d6b4;
+    --ink:#2c2118;
+    --ink-soft:#5a4a38;
+    --gold:#c9a227;
+    --gold-dk:#8a6f1c;
+    --red:#a03030;
+    --black-suit:#22201e;
+    --mana:#4a5f9e;
+    --marker:#1e6f8e;
+    --marker2:#0e5570;
+    --danger:#b23a2f;
+    --ok:#3f6d3a;
+    --shadow:0 6px 18px rgba(0,0,0,.55);
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html,body{height:100%;}
+  body{
+    background:
+      radial-gradient(1200px 600px at 50% -10%, #2a2119 0%, transparent 60%),
+      repeating-linear-gradient(90deg, #1a1511 0 140px, #1d1712 140px 280px),
+      var(--table);
+    color:var(--parch);
+    font-family: 'Palatino Linotype','Book Antiqua', Palatino, Georgia, serif;
+    padding:14px 16px 60px;
+  }
+  h1,h2,h3,.smallcaps{ font-variant: small-caps; letter-spacing:.08em; }
+  .marker{ font-family:'Bradley Hand','Segoe Print','Comic Sans MS', cursive; color:var(--marker); }
+
+  .emblem{width:30px; height:30px; display:inline-block; vertical-align:-8px;}
+  .emblem.big{width:78px; height:78px;}
+  .board h2 .emblem{color:var(--ink);}
+  #topbar .emblem, .modal h1 .emblem, #guildwrap .emblem{color:var(--gold);}
+  .charter .emblem{color:var(--ink); width:26px; height:26px; vertical-align:-7px;}
+
+  /* ============ TOP BAR ============ */
+  #topbar{
+    display:flex; flex-wrap:wrap; gap:10px; align-items:center;
+    background:linear-gradient(#241c14,#1c1610);
+    border:1px solid #3a2e20; border-radius:10px;
+    padding:10px 14px; box-shadow:var(--shadow);
+    position:sticky; top:8px; z-index:40;
+  }
+  #topbar .title{font-size:1.35rem; color:var(--gold); text-shadow:0 2px 4px #000;}
+  .pill{ background:#120e0a; border:1px solid #3a2e20; border-radius:999px;
+    padding:4px 12px; font-size:.95rem; white-space:nowrap; }
+  .pill b{color:var(--gold);}
+  .res{display:flex; gap:6px; align-items:center;}
+  .spacer{flex:1;}
+  button{
+    font-family:inherit; font-variant:small-caps; letter-spacing:.06em;
+    background:linear-gradient(#3a2e1c,#2a2114); color:var(--parch);
+    border:1px solid var(--gold-dk); border-radius:8px;
+    padding:6px 14px; font-size:.95rem; cursor:pointer;
+    transition:transform .08s ease, box-shadow .12s;
+  }
+  button:hover:not(:disabled){transform:translateY(-1px); box-shadow:0 3px 10px rgba(201,162,39,.25);}
+  button:disabled{opacity:.4; cursor:not-allowed;}
+  button.primary{background:linear-gradient(#7a5a12,#5a420e); border-color:var(--gold);}
+  button.danger{border-color:#7a2a20; background:linear-gradient(#5a241c,#421a14);}
+  button.tiny{padding:2px 8px; font-size:.8rem; border-radius:6px;}
+  button.spell{border-color:var(--mana); background:linear-gradient(#2b3550,#20283c);}
+
+  /* ============ LAYOUT ============ */
+  #game{max-width:1400px; margin:14px auto 0; display:none;}
+  #midrow{display:flex; gap:14px; margin-top:14px; align-items:stretch; flex-wrap:wrap;}
+  #boards{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:14px; }
+  @media(max-width:980px){ #boards{grid-template-columns:1fr;} }
+
+  /* ============ OMEN ROW ============ */
+  #omenwrap{
+    flex:1 1 520px;
+    background:linear-gradient(#2b2013,#241a10);
+    border:2px solid #4a3a24; border-radius:12px; padding:12px 14px;
+    box-shadow:var(--shadow);
+  }
+  #omenwrap h2{color:var(--gold); font-size:1.05rem; margin-bottom:8px; display:flex; align-items:center; gap:10px;}
+  #omenwrap h2 .hint{font-size:.8rem; color:#b8a37e; font-variant:normal; letter-spacing:0;}
+  #omenrow{display:flex; gap:12px; flex-wrap:wrap;}
+  .pcard{
+    width:96px; height:136px; border-radius:10px; position:relative;
+    background:linear-gradient(#fdf7e8,#efe4c8);
+    color:var(--black-suit);
+    border:1px solid #b9a67e;
+    box-shadow:0 4px 10px rgba(0,0,0,.5), inset 0 0 0 3px #fff8;
+    cursor:pointer; user-select:none;
+    display:flex; flex-direction:column; justify-content:space-between;
+    padding:8px; transition:transform .1s ease, box-shadow .15s;
+  }
+  .pcard:hover{transform:translateY(-4px);}
+  .pcard.red{color:var(--red);}
+  .pcard.selected{
+    outline:3px solid var(--marker);
+    transform:translateY(-6px) scale(1.04);
+    box-shadow:0 10px 22px rgba(30,111,142,.5);
+  }
+  .pcard.spelltarget{ outline:3px dashed var(--mana); }
+  .pcard.spent{opacity:.28; pointer-events:none; filter:grayscale(.6);}
+  .pcard .corner{font-weight:bold; font-size:1.15rem; line-height:1;}
+  .pcard .big{font-size:2.4rem; text-align:center;}
+  .pcard .big .fc{font-size:1.9rem; display:block; line-height:1;}
+  .pcard .corner.bot{transform:rotate(180deg);}
+  .pcard .face-tag{
+    position:absolute; bottom:34px; left:0; right:0; text-align:center;
+    font-size:.6rem; font-variant:small-caps; letter-spacing:.04em; color:#7a6340;
+  }
+  .pcard.small{width:72px; height:102px; padding:6px;}
+  .pcard.small .big{font-size:1.7rem;}
+  .pcard.small .big .fc{font-size:1.4rem;}
+
+  /* active card panel */
+  #activepanel{
+    flex:0 1 360px; min-width:300px;
+    background:linear-gradient(#241c12,#1d160e);
+    border:2px solid #4a3a24; border-radius:12px; padding:12px 14px;
+    box-shadow:var(--shadow);
+  }
+  #activepanel h2{color:var(--gold); font-size:1.05rem; margin-bottom:8px;}
+  #active-body{font-size:.92rem; line-height:1.5;}
+  .modrow{display:flex; gap:8px; margin:8px 0; flex-wrap:wrap;}
+  .valchip{
+    display:inline-block; min-width:52px; text-align:center;
+    font-size:1.6rem; font-weight:bold; padding:2px 10px;
+    background:#efe4c8; color:var(--ink); border-radius:8px; border:1px solid #b9a67e;
+  }
+  .valchip.red{color:var(--red);}
+  .note{color:#b8a37e; font-size:.82rem;}
+
+  /* ============ HAND ============ */
+  #handwrap{margin-top:14px; background:linear-gradient(#221a10,#1c150c);
+    border:2px solid #4a3a24; border-radius:12px; padding:10px 14px; box-shadow:var(--shadow);
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
+  #handwrap h2{color:var(--gold); font-size:1rem;}
+  #handcards{display:flex; gap:10px; flex-wrap:wrap;}
+  #handwrap .hint{font-size:.8rem; color:#b8a37e;}
+
+  /* ============ ATTRIBUTES / FOLLOWERS ============ */
+  #attrwrap, #followwrap{margin-top:14px; background:linear-gradient(#20180e,#191208);
+    border:2px solid #4a3a24; border-radius:12px; padding:10px 14px; box-shadow:var(--shadow);}
+  #attrwrap h2, #followwrap h2{color:var(--gold); font-size:1rem; display:flex; gap:10px; align-items:center;}
+  #attrwrap h2 .hint, #followwrap h2 .hint{font-size:.78rem; color:#b8a37e; font-variant:normal; letter-spacing:0;}
+  #attrs{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:8px;}
+  @media(max-width:900px){#attrs{grid-template-columns:repeat(2,1fr);}}
+  .attr{
+    background:linear-gradient(#efe4c8,#ddcba2); color:var(--ink);
+    border:1px solid #a8946a; border-radius:10px; padding:8px 10px;
+  }
+  .attr h3{font-size:.92rem; display:flex; gap:6px; align-items:center;}
+  .attr .pips{display:flex; gap:5px; margin:6px 0;}
+  .attr .pip{width:18px; height:18px; border-radius:50%; border:2px solid var(--ink-soft);}
+  .attr .pip.on{background:var(--marker); border-color:var(--marker2);}
+  .attr .lvl{font-size:.68rem; color:var(--ink-soft); line-height:1.3;}
+  .attr .lvl .got{color:var(--marker2); font-weight:bold;}
+  #followers{display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;}
+  .follower{
+    background:linear-gradient(#efe4c8,#ddcba2); color:var(--ink);
+    border:1px solid #a8946a; border-radius:10px; padding:8px 12px;
+    display:flex; flex-direction:column; gap:4px; min-width:170px; flex:1 1 170px;
+  }
+  .follower .fh{display:flex; gap:6px; align-items:center; font-weight:bold; font-size:.9rem;}
+  .follower .fcount{margin-left:auto; background:var(--ink); color:var(--parch); border-radius:999px;
+    padding:0 9px; font-size:.85rem;}
+  .follower .fdesc{font-size:.7rem; color:var(--ink-soft);}
+
+  /* ============ GUILD ============ */
+  #guildwrap{margin-top:14px; background:linear-gradient(#20180e,#191208);
+    border:2px solid #4a3a24; border-radius:12px; padding:10px 14px; box-shadow:var(--shadow);}
+  #guildwrap h2{color:var(--gold); font-size:1rem; display:flex; gap:10px; align-items:center;}
+  #guildwrap h2 .hint{font-size:.8rem; color:#b8a37e; font-variant:normal; letter-spacing:0;}
+  #charters{display:flex; gap:10px; margin-top:8px; flex-wrap:wrap;}
+  .charter{
+    flex:1 1 220px; min-width:210px;
+    background:linear-gradient(#efe4c8,#ddcba2); color:var(--ink);
+    border:1px solid #a8946a; border-radius:10px; padding:10px 12px; position:relative;
+  }
+  .charter.locked{filter:saturate(.55) brightness(.92);}
+  .charter h3{font-size:.95rem; display:flex; gap:6px; align-items:center;}
+  .charter .cdesc{font-size:.74rem; color:var(--ink-soft); line-height:1.3; margin:4px 0 8px;}
+  .charter .unlocked-tag{color:var(--marker2); font-weight:bold; font-size:.8rem; letter-spacing:.08em;}
+  .charter button{width:100%;}
+
+  /* ============ BOARDS ============ */
+  .board{
+    background:
+      radial-gradient(600px 300px at 20% 0%, #fff3 0%, transparent 50%),
+      linear-gradient(160deg, var(--parch) 0%, var(--parch2) 100%);
+    color:var(--ink);
+    border-radius:12px; border:1px solid #a8946a;
+    box-shadow:var(--shadow), inset 0 0 60px rgba(120,90,40,.25);
+    padding:14px 16px 16px; position:relative;
+  }
+  .board::before{
+    content:''; position:absolute; inset:6px; border:1px solid rgba(90,74,56,.35);
+    border-radius:8px; pointer-events:none;
+  }
+  .board h2{ font-size:1.25rem; display:flex; align-items:center; gap:8px; margin-bottom:2px; }
+  .board h2 .suitmark{font-size:1.4rem;}
+  .board h2 .suitmark.red{color:var(--red);}
+  .board h2::after{content:''; flex:1; height:6px; margin-left:6px;
+    background:radial-gradient(circle at 3px 3px, rgba(90,74,56,.5) 1.4px, transparent 1.6px) 0 0/9px 6px repeat-x;}
+  .board .sub{font-size:.8rem; color:var(--ink-soft); margin-bottom:10px; font-style:italic;}
+  .slot{
+    border:2px solid var(--ink-soft); border-radius:8px; background:rgba(255,255,255,.45);
+    position:relative; transition:box-shadow .12s, transform .1s;
+  }
+  .slot.legal{
+    box-shadow:0 0 0 3px var(--marker), 0 4px 12px rgba(30,111,142,.4);
+    cursor:pointer; animation:pulse 1.2s infinite;
+  }
+  @keyframes pulse{50%{box-shadow:0 0 0 5px rgba(30,111,142,.55), 0 4px 12px rgba(30,111,142,.35);}}
+  .slot.done{ background:rgba(30,111,142,.10); border-color:var(--marker2); }
+  .slot .mark{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    font-family:'Bradley Hand','Segoe Print','Comic Sans MS', cursive;
+    font-size:1.5rem; color:var(--marker2); font-weight:bold; transform:rotate(-4deg);
+  }
+  .rw{font-size:.72rem; color:var(--ink-soft); text-align:center;}
+  .ficon{font-size:.85rem;}
+
+  #dungeon-rooms{display:grid; grid-template-columns:repeat(4,1fr); gap:8px;}
+  .depth-label{grid-column:1/-1; font-variant:small-caps; letter-spacing:.1em;
+    font-size:.8rem; color:var(--ink-soft); border-bottom:1px dashed var(--ink-soft); margin-top:6px;}
+  .room{padding:7px 6px 6px; min-height:96px; display:flex; flex-direction:column; gap:2px; align-items:center; justify-content:flex-start;}
+  .room .remoji{font-size:1.3rem; line-height:1.1;}
+  .room .rname{font-size:.68rem; text-align:center; line-height:1.05; font-weight:bold;}
+  .room .rreq{font-size:.88rem; font-weight:bold;}
+  .room .rreq.fight{color:var(--danger);}
+  .room .rreq.trap{color:var(--marker2);}
+  .room .rreq.boss{color:#7a1fa0;}
+  .room .mark{font-size:2.1rem; opacity:.85;}
+
+  #forest-trail{display:grid; grid-template-columns:repeat(8,1fr); gap:6px;}
+  .fslot{min-height:92px; padding:6px 4px; display:flex; flex-direction:column; align-items:center; gap:3px;}
+  .fslot .femoji{font-size:1rem;}
+  .fslot .num{width:38px; height:38px; border:2px dashed var(--ink-soft); border-radius:50%;
+    display:flex; align-items:center; justify-content:center; font-size:1.1rem; position:relative;}
+  .fslot.done .num{border-style:solid; border-color:var(--marker2);}
+  .fslot .num .mark{position:static; transform:rotate(-6deg); font-size:1.25rem;}
+  .forest-rule{font-size:.78rem; color:var(--ink-soft); margin-top:8px; text-align:center;}
+
+  #temple-altars{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .altar h3{font-size:.95rem; text-align:center; margin-bottom:6px;}
+  .altar .boxes{display:grid; grid-template-columns:repeat(4,1fr); gap:6px;}
+  .abox{min-height:74px; padding:5px 3px; display:flex; flex-direction:column; align-items:center; gap:3px;}
+  .abox .num{width:34px; height:34px; border:2px dashed var(--ink-soft); border-radius:6px;
+    display:flex; align-items:center; justify-content:center; position:relative;}
+  .abox.done .num{border-style:solid; border-color:var(--marker2);}
+  .abox .num .mark{position:static; font-size:1.15rem;}
+  .altar .sums{font-size:.72rem; text-align:center; color:var(--ink-soft); margin-top:5px;}
+  .altar .cursum{font-size:.8rem; text-align:center; margin-top:3px;}
+
+  #market-items{display:grid; grid-template-columns:repeat(3,1fr); gap:8px;}
+  .item{padding:8px 6px; min-height:104px; display:flex; flex-direction:column; align-items:center; gap:2px;}
+  .item .iemoji{font-size:1.3rem;}
+  .item .iname{font-weight:bold; font-size:.88rem;}
+  .item .iprice{font-size:.82rem; color:var(--gold-dk); font-weight:bold;}
+  .item .idesc{font-size:.68rem; text-align:center; color:var(--ink-soft); line-height:1.2;}
+  .item.owned{background:rgba(30,111,142,.12);}
+  .item.owned::after{content:'OWNED'; position:absolute; top:4px; right:6px;
+    font-size:.6rem; color:var(--marker2); font-weight:bold; letter-spacing:.08em;}
+  #market-actions{display:flex; gap:8px; margin-top:10px; justify-content:center; flex-wrap:wrap;}
+  .sellzone{border:2px dashed var(--ink-soft); border-radius:8px; padding:8px 14px; font-size:.85rem; text-align:center;}
+  .sellzone.legal{box-shadow:0 0 0 3px var(--marker); cursor:pointer; animation:pulse 1.2s infinite;}
+
+  #tower-floors{display:flex; flex-direction:column-reverse; gap:6px; max-width:360px; margin:0 auto;}
+  .tfloor{min-height:52px; display:flex; align-items:center; gap:10px; padding:6px 10px;}
+  .tfloor .num{width:36px; height:36px; border:2px dashed var(--ink-soft); border-radius:6px;
+    display:flex; align-items:center; justify-content:center; flex:0 0 auto; position:relative;}
+  .tfloor.done .num{border-style:solid; border-color:var(--marker2);}
+  .tfloor .num .mark{position:static; font-size:1.15rem;}
+  .tfloor .rw{text-align:left;}
+
+  #bog-pens{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+  .pen{padding:8px 6px; min-height:112px; display:flex; flex-direction:column; align-items:center; gap:4px;}
+  .pen .pemoji{font-size:1.3rem;}
+  .pen .pairrow{display:flex; gap:6px;}
+  .pen .num{width:32px; height:32px; border:2px dashed var(--ink-soft); border-radius:50%;
+    display:flex; align-items:center; justify-content:center; position:relative;}
+  .pen .num.filled{border-style:solid; border-color:var(--marker2);}
+  .pen .num .mark{position:static; font-size:1.05rem;}
+
+  #tavern-run{display:grid; grid-template-columns:repeat(5,1fr); gap:6px;}
+  .tbox{min-height:86px; padding:6px 4px; display:flex; flex-direction:column; align-items:center; gap:4px;}
+  .tbox .num{width:36px; height:36px; border:2px dashed var(--ink-soft); border-radius:6px;
+    display:flex; align-items:center; justify-content:center; position:relative;}
+  .tbox.done .num{border-style:solid; border-color:var(--marker2);}
+  .tbox .num .mark{position:static; font-size:1.15rem;}
+
+  .starline{display:flex; gap:4px; align-items:center; font-size:.85rem; margin-top:8px;
+    justify-content:center; color:var(--ink-soft);}
+
+  /* ============ LOG ============ */
+  #logwrap{margin-top:14px; background:#151009; border:1px solid #3a2e20;
+    border-radius:10px; padding:10px 14px; max-height:170px; overflow:auto;
+    font-size:.85rem; line-height:1.5; box-shadow:var(--shadow);}
+  #logwrap .lt{color:#8f7c5c;}
+  #logwrap .good{color:#9fc98f;}
+  #logwrap .bad{color:#d98a7f;}
+  #logwrap .sys{color:var(--gold);}
+
+  /* ============ MODALS / SETUP ============ */
+  .overlay{position:fixed; inset:0; background:rgba(8,5,3,.85); z-index:100;
+    display:flex; align-items:center; justify-content:center; padding:20px; overflow:auto;}
+  .modal{
+    background:linear-gradient(#2b2013,#1f170d);
+    border:2px solid var(--gold-dk); border-radius:14px;
+    max-width:900px; width:100%; padding:26px 30px; box-shadow:0 20px 60px #000;
+    max-height:92vh; overflow:auto;
+  }
+  .modal h1{color:var(--gold); font-size:1.9rem; text-align:center; text-shadow:0 3px 8px #000;}
+  .modal h2{color:var(--gold); font-size:1.15rem; margin:16px 0 8px;}
+  .modal p{line-height:1.55; margin:8px 0; font-size:.95rem;}
+  .tagline{text-align:center; color:#b8a37e; font-style:italic; margin-top:2px;}
+  #classgrid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:14px;}
+  @media(max-width:720px){#classgrid{grid-template-columns:1fr;}}
+  .classcard{
+    background:linear-gradient(#efe4c8,#e0d0aa); color:var(--ink);
+    border-radius:10px; border:1px solid #a8946a; padding:12px;
+    cursor:pointer; transition:transform .1s, box-shadow .15s;
+  }
+  .classcard:hover{transform:translateY(-3px); box-shadow:0 8px 18px rgba(201,162,39,.35);}
+  .classcard.selected{outline:3px solid var(--gold);}
+  .classcard h3{font-size:1.05rem; display:flex; gap:8px; align-items:center;}
+  .classcard h3 .cicon{font-size:1.5rem;}
+  .classcard .cp{font-size:.78rem; margin-top:6px; line-height:1.35;}
+  .classcard .cp b{color:var(--gold-dk);}
+  .modulebox{
+    display:flex; gap:10px; align-items:flex-start;
+    background:#1a130b; border:1px solid #3a2e20; border-radius:10px;
+    padding:10px 12px; margin-top:8px; cursor:pointer;
+  }
+  .modulebox input{margin-top:4px; transform:scale(1.3); accent-color:var(--gold);}
+  .pickrow{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:6px 0 12px;}
+  @media(max-width:720px){.pickrow{grid-template-columns:1fr;}}
+  .pickrow .classcard{padding:9px 10px;}
+  .pickrow .classcard h3{font-size:.92rem;}
+  .pickrow .classcard .cp{font-size:.72rem;}
+  .picklabel{color:var(--gold); font-variant:small-caps; letter-spacing:.08em; font-size:.95rem; margin-top:4px;}
+  .modulebox .mt{font-weight:bold; color:var(--gold); font-variant:small-caps; letter-spacing:.05em;}
+  .modulebox .md{font-size:.82rem; color:#b8a37e; line-height:1.4;}
+  .center{text-align:center;}
+  .bigscore{font-size:2.4rem; color:var(--gold); text-align:center; margin:8px 0;}
+  table.scoretbl{width:100%; border-collapse:collapse; margin-top:8px; font-size:.92rem;}
+  table.scoretbl td, table.scoretbl th{padding:4px 8px; border-bottom:1px solid #3a2e20; text-align:left;}
+  table.scoretbl td:last-child{text-align:right; color:var(--gold);}
+  .threatbar{display:flex; gap:3px; margin:10px 0; flex-wrap:wrap;}
+  .tseg{width:22px; height:22px; border-radius:4px; border:1px solid #5a3a2a; background:#241812;}
+  .tseg.hot{background:var(--danger); box-shadow:0 0 6px rgba(178,58,47,.7);}
+  .tseg.def{background:var(--ok); box-shadow:0 0 6px rgba(63,109,58,.6);}
+  kbd.suit{font-family:inherit; padding:0 4px;}
+  .flash{animation:flashbg .5s;}
+  @keyframes flashbg{0%{background:rgba(201,162,39,.35);}100%{background:transparent;}}
+
+  /* chronicle */
+  #chron-stats{display:flex; gap:10px; flex-wrap:wrap; margin:10px 0;}
+  #chron-stats .pill{font-size:.9rem;}
+  .chronrow{cursor:pointer;}
+  .chronrow:hover{background:#241b10;}
+  #chron-log{background:#151009; border:1px solid #3a2e20; border-radius:8px;
+    padding:8px 12px; max-height:200px; overflow:auto; font-size:.8rem; line-height:1.5; margin-top:10px; display:none;}
+  .savenote{font-size:.78rem; color:#8f7c5c; text-align:center; margin-top:10px;}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+
+<symbol id="fd-crest" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 5 L53 11 V31 C53 46 44 54 32 59 C20 54 11 46 11 31 V11 Z"/>
+    <rect x="21" y="21" width="14" height="20" rx="2" transform="rotate(-12 28 31)"/>
+    <path d="M28 27 a2.6 2.6 0 1 1 -0.1 0 M26 34 h4" stroke-width="2.4"/>
+    <path d="M20 45 L44 19 M22 40 l7 6 M40 15 l4 4" />
+  </g>
+  <path d="M44 19 l4 -4 -1 5 z" fill="var(--gold)" stroke="none"/>
+</symbol>
+
+<symbol id="fd-dungeon" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 58 V30 A22 22 0 0 1 54 30 V58"/>
+    <path d="M22 58 V38 M32 58 V34 M42 58 V38"/>
+    <path d="M6 58 H58"/>
+  </g>
+  <g fill="currentColor" stroke="none">
+    <circle cx="32" cy="20" r="6"/>
+    <circle cx="29.6" cy="19" r="1.7" fill="var(--parch)"/>
+    <circle cx="34.4" cy="19" r="1.7" fill="var(--parch)"/>
+    <path d="M30 25 h4 v2 h-4 z"/>
+  </g>
+</symbol>
+
+<symbol id="fd-forest" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="21" cy="26" r="10"/>
+    <circle cx="35" cy="17" r="11"/>
+    <circle cx="44" cy="30" r="9"/>
+    <path d="M31 60 V36 M31 44 L22 35 M31 40 L41 32"/>
+    <path d="M22 60 q9 -5 18 0"/>
+  </g>
+  <circle cx="44" cy="30" r="2.4" fill="var(--gold)" stroke="none"/>
+</symbol>
+
+<symbol id="fd-temple" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M9 22 L32 7 L55 22 M9 22 H55"/>
+    <path d="M15 27 V52 M22 27 V52 M42 27 V52 M49 27 V52"/>
+    <path d="M8 57 H56"/>
+    <circle cx="32" cy="39" r="8.5"/>
+  </g>
+  <path d="M32 30.5 a8.5 8.5 0 0 1 0 17 z" fill="var(--gold)" stroke="none"/>
+</symbol>
+
+<symbol id="fd-market" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 10 V46 M24 54 H40 L32 46 Z"/>
+    <path d="M13 18 H51"/>
+    <path d="M13 18 L8 32 M13 18 L18 32 M51 18 L46 32 M51 18 L56 32"/>
+    <path d="M6 32 A7.5 7.5 0 0 0 20 32 M44 32 A7.5 7.5 0 0 0 58 32"/>
+  </g>
+  <circle cx="32" cy="14" r="3" fill="var(--gold)" stroke="none"/>
+</symbol>
+
+<symbol id="fd-tower" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M25 58 V25 M39 58 V25 M20 58 H44"/>
+    <path d="M20 25 L32 6 L44 25 Z"/>
+    <circle cx="32" cy="38" r="3.4"/>
+    <path d="M25 50 h14"/>
+  </g>
+  <path d="M52 12 a7 7 0 1 0 4 11 a6 6 0 0 1 -4 -11 z" fill="var(--gold)" stroke="none"/>
+</symbol>
+
+<symbol id="fd-bog" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M6 47 Q11 43 17 47 T28 47 T39 47 T50 47 T58 47"/>
+    <path d="M21 47 Q23 37 30 37 Q37 37 39 47"/>
+    <path d="M12 47 V30 M12 34 l-5 -4 M50 47 V26"/>
+  </g>
+  <g fill="currentColor" stroke="none">
+    <circle cx="26.5" cy="41" r="2.2"/>
+    <circle cx="34" cy="41" r="2.2"/>
+    <rect x="47.4" y="20" width="5.2" height="9" rx="2.6"/>
+  </g>
+</symbol>
+
+<symbol id="fd-tavern" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M19 24 V52 Q19 57 24 57 H37 Q42 57 42 52 V24"/>
+    <path d="M19 36 H42"/>
+    <path d="M42 30 Q55 29 55 39 Q55 49 42 48"/>
+    <circle cx="21" cy="19" r="5.5"/>
+    <circle cx="31" cy="15" r="6.5"/>
+    <circle cx="41" cy="19" r="5.5"/>
+  </g>
+  <circle cx="31" cy="15" r="2" fill="var(--gold)" stroke="none"/>
+</symbol>
+
+<symbol id="fd-horde" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M20 22 Q10 14 15 5 Q22 9 24 18"/>
+    <path d="M44 22 Q54 14 49 5 Q42 9 40 18"/>
+    <path d="M20 22 A13 13 0 0 1 44 22 V36 L37 45 H27 L20 36 Z"/>
+    <path d="M27 45 v5 M32 45 v7 M37 45 v5"/>
+  </g>
+  <g fill="var(--danger)" stroke="none">
+    <path d="M23 28 l8 3 -8 3 z"/>
+    <path d="M41 28 l-8 3 8 3 z"/>
+  </g>
+</symbol>
+
+<symbol id="fd-delve" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M24 56 L46 24"/>
+    <path d="M34 12 Q48 10 58 24 M34 12 q2 6 8 10 M58 24 q-7 0 -12 4"/>
+  </g>
+  <g stroke="currentColor" stroke-width="2.4" stroke-linejoin="round">
+    <path d="M8 44 L15 37 L22 44 L15 54 Z" fill="var(--gold)"/>
+    <path d="M8 44 H22 M15 37 L12 44 L15 54 M15 37 l3 7 -3 10" fill="none"/>
+  </g>
+</symbol>
+
+
+<symbol id="fd-catacombs" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="32" cy="32" r="24" stroke-dasharray="6 7"/>
+  </g>
+  <g fill="currentColor" stroke="none">
+    <circle cx="32" cy="30" r="8"/>
+    <circle cx="29" cy="28.6" r="2.2" fill="var(--parch)"/>
+    <circle cx="35" cy="28.6" r="2.2" fill="var(--parch)"/>
+    <path d="M29 36 h6 v3 h-6 z"/>
+  </g>
+</symbol>
+<symbol id="fd-warcamp" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M24 58 V10"/><path d="M14 54 L50 22 M50 54 L14 22" stroke-width="2.4"/>
+  </g>
+  <path d="M24 10 H48 L40 17 L48 24 H24 Z" fill="var(--gold)" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+</symbol>
+<symbol id="fd-thicket" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linejoin="round">
+    <path d="M10 10 H54 V54 H10 Z M10 24.6 H54 M10 39.3 H54 M24.6 10 V54 M39.3 10 V54"/>
+  </g>
+  <path d="M46.5 17.3 q6 -8 0 -12 q-6 4 0 12 z" fill="var(--gold)" stroke="none" transform="translate(0 12)"/>
+</symbol>
+<symbol id="fd-stones" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="12" y="24" width="10" height="32" rx="2"/>
+    <rect x="42" y="24" width="10" height="32" rx="2"/>
+    <rect x="27" y="30" width="10" height="26" rx="2"/>
+    <rect x="8" y="14" width="48" height="9" rx="2"/>
+  </g>
+  <circle cx="32" cy="18.5" r="2.4" fill="var(--gold)" stroke="none"/>
+</symbol>
+<symbol id="fd-road" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M10 58 Q32 48 22 38 T34 18 T54 10" stroke-dasharray="7 6"/>
+    <path d="M40 40 V56 M52 40 V56 M36 40 H56 M38 34 H54"/>
+  </g>
+  <path d="M34 34 Q46 26 58 34 L54 40 H38 Z" fill="var(--gold)" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round"/>
+</symbol>
+<symbol id="fd-oracle" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 32 Q32 10 56 32 Q32 54 8 32 Z"/>
+    <path d="M32 6 V12 M14 12 l4 5 M50 12 l-4 5 M32 58 V52 M14 52 l4 -5 M50 52 l-4 -5"/>
+  </g>
+  <circle cx="32" cy="32" r="9" fill="none" stroke="currentColor" stroke-width="3"/>
+  <circle cx="32" cy="32" r="3.6" fill="var(--gold)" stroke="none"/>
+</symbol>
+<symbol id="fd-gemcutter" viewBox="0 0 64 64">
+  <g stroke="currentColor" stroke-width="3" stroke-linejoin="round">
+    <path d="M18 22 H46 L56 34 L32 58 L8 34 Z" fill="none"/>
+    <path d="M8 34 H56 M18 22 L26 34 L32 58 M46 22 L38 34 L32 58 M26 34 H38" fill="none" stroke-width="2.4"/>
+  </g>
+  <path d="M26 34 L32 26 L38 34 L32 44 Z" fill="var(--gold)" stroke="none"/>
+</symbol>
+<symbol id="fd-traderoute" viewBox="0 0 64 64">
+  <g fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round">
+    <path d="M14 48 L32 16 L52 40 L14 48" stroke-dasharray="6 5"/>
+  </g>
+  <g fill="var(--parch)" stroke="currentColor" stroke-width="3">
+    <circle cx="14" cy="48" r="6.5"/><circle cx="32" cy="16" r="6.5"/><circle cx="52" cy="40" r="6.5"/>
+  </g>
+  <circle cx="52" cy="40" r="2.6" fill="var(--gold)" stroke="none"/>
+</symbol>
+</defs></svg>
+
+
+<!-- ================= SETUP ================= -->
+<div class="overlay" id="setup">
+  <div class="modal">
+    <h1><svg class="emblem big" style="width:52px;height:52px;vertical-align:-14px;"><use href="#fd-crest"/></svg> Flip Dungeon <svg class="emblem big" style="width:52px;height:52px;vertical-align:-14px;"><use href="#fd-crest"/></svg></h1>
+    <p class="tagline">A flip-and-write of perilous delves and calculated greed — playtest prototype v0.3</p>
+    <div class="center" id="resumewrap" style="display:none; margin-top:10px;">
+      <button class="primary" onclick="resumeGame()">▶ Resume Saved Game</button>
+      <button class="danger tiny" onclick="abandonSave()">Abandon it</button>
+    </div>
+    <h2>Choose Your Hero</h2>
+    <div id="classgrid"></div>
+    <h2>Choose Your Adventure Boards <span class="note" style="font-variant:normal; letter-spacing:0;">— one per suit; mix for different puzzles each game</span></h2>
+    <div id="boardpick"></div>
+    <h2>Difficulty</h2>
+    <div id="diffgrid" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
+    <h2>Experimental Modules <span class="note" style="font-variant:normal; letter-spacing:0;">— optional rules to playtest</span></h2>
+    <label class="modulebox"><input type="checkbox" id="mod-attrs">
+      <span><span class="mt">📊 Attributes</span><br>
+      <span class="md">Four trainable attributes — 💪 Might (♠), 🤸 Agility (♣), 🧠 Wisdom (♥), 🕯 Spirit (♦). Spend a matching card of value 4/7/10 to train level 1/2/3. Each level unlocks a permanent bonus.</span></span></label>
+    <label class="modulebox"><input type="checkbox" id="mod-followers">
+      <span><span class="mt">🧑‍🌾 Camp Followers</span><br>
+      <span class="md">Certain spaces (and Jacks, and repelled assaults) recruit followers — ⚔ Squires, 🌿 Herbalists, 🕯 Acolytes, 🧺 Traders. Spend them for special one-shot actions.</span></span></label>
+    <label class="modulebox"><input type="checkbox" id="mod-pyl">
+      <span><span class="mt">🎲 Push Your Luck</span><br>
+      <span class="md">Three gambles: <b>Delve</b> cleared dungeon rooms for depth-scaled loot (two perils or a black face = bust and a Wound) · <b>Overdraw</b> extra hero cards (a face card joins the horde instead) · make a <b>Last Stand</b> at the assault, flipping cards for Defense that might feed the Threat. At 5+ Wounds you are Battered: hand limit 2.</span></span></label>
+    <label class="modulebox"><input type="checkbox" id="mod-spells">
+      <span><span class="mt">✨ Spellcraft</span><br>
+      <span class="md">Burn TWO cards at once plus mana for big effects — Fireball a dungeon room, Divine a fresh Omen Row, Transmute cards to gold, or Warp Time for an extra pick.</span></span></label>
+    <div class="center" style="margin-top:18px;">
+      <button class="primary" id="startbtn" onclick="startGame()" disabled>Begin the Adventure</button>
+      <button onclick="toggleRules(true)">How to Play</button>
+      <button onclick="openChronicle()">📜 Chronicle</button>
+    </div>
+    <div class="savenote">Games, logs and results are saved in your browser (localStorage). Note: saving works when this file is opened directly in a browser — not inside the claude.ai preview pane.</div>
+  </div>
+</div>
+
+<!-- ================= RULES ================= -->
+<div class="overlay" id="rules" style="display:none;">
+  <div class="modal">
+    <h1>How to Play</h1>
+    <p><b>Goal.</b> Score the most points over <b>3 rounds of 5 turns</b> by adventuring in four locations, growing your hero, and surviving the <b>Monster Assault</b> at the end of each round.</p>
+    <h2>The Turn</h2>
+    <p>Each turn, <b>4 cards</b> are flipped into the <b>Omen Row</b>. You take <b>2</b> of them. Click a card, tweak it if you like, then click a glowing space on a board to write it in. Number cards go to the location matching their suit:</p>
+    <p><kbd class="suit">♠</kbd> <b>Dungeon</b> — clear rooms in order. Fights need <b>high</b> cards, traps need <b>low</b> cards.<br>
+       <kbd class="suit">♣</kbd> <b>Forest</b> — write values on the trail in <b>strictly rising</b> order.<br>
+       <kbd class="suit" style="color:#a03030">♥</kbd> <b>Temple</b> — <b>odd</b> values on the Sun altar, <b>even</b> on the Moon; no repeats on an altar. Higher sums score more Spirit.<br>
+       <kbd class="suit" style="color:#a03030">♦</kbd> <b>Market</b> — sell the card for gold (half its value, rounded up), or buy an item: card value must reach the price, and you pay the price in gold.</p>
+    <p><b>Face cards are events</b>, not numbers: <b>Jack</b> = +3 gold · <b>Queen</b> = +2 mana <i>or</i> heal 2 wounds · <b>King</b> = +1 XP and −1 Threat. <b>Aces</b> count as 1 and grant +1 XP when written.</p>
+    <p>Any taken number card may instead be <b>camped</b> for 1 gold if you have no good use for it.</p>
+    <h2>Board Selection</h2>
+    <p>At setup you choose <b>one board per suit</b> from three options each — 81 combinations. Every board scores into its suit's star track (♠ Glory, ♣ Lore, ♥ Spirit, ♦ Fortune) but plays by different rules: gauntlets, rondels, blackjack musters, spatial clearing, rising sums, one-way pilgrimages, prophecies, pattern-cutting, and road networks. Mix them for a different puzzle every game.</p>
+    <h2>Bending Fate</h2>
+    <p>While a card is selected: pay <b>1 gold</b> per <b>±1</b> to its value, or <b>2 mana</b> to change its suit. Modified values count for everything (parity, thresholds, order).</p>
+    <h2>Hero Hand</h2>
+    <p>At the start of each round, draw <b>3 cards from your own deck</b>, and draw <b>1 more at the start of each turn</b> (hand limit 3). Playing a hand card is a <b>free extra action</b> — it doesn't use one of your 2 picks. Spend them for big turns; a full hand means wasted draws.</p>
+    <h2>Threat &amp; the Assault</h2>
+    <p>Every <b>face card left in the Omen Row</b> at end of turn adds <b>+1 Threat</b>. After turn 5, monsters attack: compare your <b>Defense</b> (bosses slain, Shield, Temple wards, class) to the Threat. Fully defend to gain Glory and XP; otherwise take <b>Wounds</b> (−2 pts each, healable at the Temple or by Queens).</p>
+    <h2>Spending XP — The Adventurers' Guild</h2>
+    <p>XP is worth 1 point each at game end, but during play you may spend it at the <b>Guild</b> to charter <b>new adventure locations</b> (3 XP for the first, 5 for the second, 7 for the third):</p>
+    <p>🗼 <b>Wizard's Tower</b> — <i>any suit</i>: five floors built bottom-up, each value strictly lower than the one beneath.<br>
+    🐊 <b>Beast Bog</b> — <i>♠/♣</i>: bait a pen, then trap the beast with a matching value. Pens must use different values.<br>
+    🍺 <b>Gilded Tavern</b> — <i>♥/♦</i>: build a run — each new value exactly one above or below a value already played.</p>
+    <h2>Difficulty</h2>
+    <p>🌿 <b>Adventurer</b>: assault base Threat 2/4/6. ⚔ <b>Veteran</b>: 3/5/8, start with less gold. 💀 <b>Nightmare</b>: 4/7/10, no starting mana, deeper wound caps. Leftover face cards add to the base as usual.</p>
+    <h2>Experimental Modules</h2>
+    <p>📊 <b>Attributes:</b> spend a number card of the matching suit to train — value ≥ 4 for level 1, ≥ 7 for level 2, ≥ 10 for level 3. Levels grant permanent bonuses (shown on the panel).<br>
+    🧑‍🌾 <b>Camp Followers:</b> follower icons on certain spaces recruit when you fill them; Jacks recruit a Trader; repelling an assault recruits a Squire. Spend a follower any time for its one-shot action.<br>
+    ✨ <b>Spellcraft:</b> select a first card, choose a spell, then click a second card (row cards each use a pick; hand cards are free). Both cards are consumed along with the mana. Face cards count as value 10 in spells.</p>
+    <p>🎲 <b>Push Your Luck:</b> after clearing a dungeon room you may <b>Delve</b> — flip cards one at a time; red cards bank gold equal to the room's depth (red faces add mana), one black number is a peril, a second black number or any black face is an ambush: lose the unbanked loot and take a Wound. <b>Overdraw</b> lets you draw extra hero cards; a face card escapes to the horde for +1 Threat. At the assault you may make a <b>Last Stand</b>, flipping cards for +1 Defense (red) or +1 Threat (black), stopping whenever you dare. At 5+ Wounds you are <b>Battered</b>: hand limit 2.</p>
+    <h2>Scoring</h2>
+    <p>Stars (⭐ = 2 pts) in <b>Glory</b>, <b>Lore</b>, <b>Spirit</b>, <b>Fortune</b> (+1⭐ per 6 gold at the end) · <b>XP</b> = 1 pt each · <b>Wounds</b> = −2 pts each (Necromancer: −1).</p>
+    <div class="center" style="margin-top:14px;"><button class="primary" onclick="toggleRules(false)">Close</button></div>
+  </div>
+</div>
+
+<!-- ================= GAME ================= -->
+<div id="game">
+  <div id="topbar">
+    <span class="title"><svg class="emblem"><use href="#fd-crest"/></svg> Flip Dungeon</span>
+    <span class="pill">Round <b id="ui-round">1</b>/3 · Turn <b id="ui-turn">1</b>/5</span>
+    <span class="pill res">🪙 <b id="ui-gold">0</b></span>
+    <span class="pill res">🔮 <b id="ui-mana">0</b></span>
+    <span class="pill res">✦ XP <b id="ui-xp">0</b></span>
+    <span class="pill res">🩸 <b id="ui-wounds">0</b></span>
+    <span class="pill res">🛡 <b id="ui-def">0</b></span>
+    <span class="pill res" title="Face cards left behind raise the Threat">🔥 <b id="ui-threat">0</b></span>
+    <span class="pill res">⭐ <b id="ui-stars">0</b></span>
+    <span class="spacer"></span>
+    <button id="abilitybtn" onclick="useAbility()">Ability</button>
+    <button onclick="openChronicle()">📜</button>
+    <button onclick="toggleRules(true)">Rules</button>
+    <button class="danger" onclick="quitGame()">Quit</button>
+  </div>
+
+  <div id="midrow">
+    <div id="omenwrap">
+      <h2>🃏 The Omen Row <span class="hint">— take 2 cards each turn; leftover face cards raise the Threat</span></h2>
+      <div id="omenrow"></div>
+      <div style="margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <button class="primary" id="endturnbtn" onclick="endTurn()">End Turn</button>
+        <span class="note" id="draftnote"></span>
+      </div>
+    </div>
+    <div id="activepanel">
+      <h2>🎴 Selected Card</h2>
+      <div id="active-body"><span class="note">Click a card in the Omen Row or your Hero Hand.</span></div>
+    </div>
+  </div>
+
+  <div id="handwrap">
+    <h2>🎒 Hero Hand</h2>
+    <div id="handcards"></div>
+    <button class="tiny" id="overdrawbtn" style="display:none;" onclick="overdraw()">🎴 Overdraw</button>
+    <span class="hint" id="handhint">Your own deck. Playing a hand card is a free extra action. Draw 1 each turn (hand limit 3); fresh hand of 3 each round.</span>
+  </div>
+
+  <div id="attrwrap" style="display:none;">
+    <h2>📊 Attributes <span class="hint">— train with a matching-suit card: value ≥ 4 / 7 / 10 for level 1 / 2 / 3. Select a card, then click Train.</span></h2>
+    <div id="attrs"></div>
+  </div>
+
+  <div id="followwrap" style="display:none;">
+    <h2>🧑‍🌾 Camp Followers <span class="hint">— recruited from marked spaces, Jacks, and repelled assaults. Spend any time.</span></h2>
+    <div id="followers"></div>
+  </div>
+
+  <div id="guildwrap">
+    <h2><svg class="emblem"><use href="#fd-crest"/></svg> The Adventurers' Guild <span class="hint">— spend XP to charter new adventure locations (they open immediately and stay open)</span></h2>
+    <div id="charters"></div>
+  </div>
+
+  <div id="boards">
+    <div class="board" id="board-dungeon">
+      <h2><svg class="emblem"><use href="#fd-dungeon"/></svg> <span class="suitmark">♠</span> The Dungeon <span style="font-size:.8rem;color:var(--ink-soft);">(Glory)</span></h2>
+      <div class="sub">Clear rooms in order. Fights need value ≥ X. Traps need value ≤ X. Each boss slain grants +1 Defense.</div>
+      <div id="dungeon-rooms"></div>
+      <div class="starline">Glory earned: <span id="glory-stars"></span></div>
+    </div>
+
+    <div class="board" id="board-forest">
+      <h2><svg class="emblem"><use href="#fd-forest"/></svg> <span class="suitmark">♣</span> The Wildwood <span style="font-size:.8rem;color:var(--ink-soft);">(Lore)</span></h2>
+      <div class="sub">Write club values along the trail — each must be strictly higher than the last.</div>
+      <div id="forest-trail"></div>
+      <div class="forest-rule" id="forest-last"></div>
+      <div class="starline">Lore earned: <span id="lore-stars"></span></div>
+    </div>
+
+    <div class="board" id="board-temple">
+      <h2><svg class="emblem"><use href="#fd-temple"/></svg> <span class="suitmark red">♥</span> The Twin Temple <span style="font-size:.8rem;color:var(--ink-soft);">(Spirit)</span></h2>
+      <div class="sub">Sun altar takes odd values, Moon altar takes even. No repeated value on an altar. Completing an altar scores Spirit by its sum.</div>
+      <div id="temple-altars"></div>
+      <div class="starline">Spirit earned: <span id="spirit-stars"></span></div>
+    </div>
+
+    <div class="board" id="board-market">
+      <h2><svg class="emblem"><use href="#fd-market"/></svg> <span class="suitmark red">♦</span> The Market <span style="font-size:.8rem;color:var(--ink-soft);">(Fortune)</span></h2>
+      <div class="sub">Sell a diamond for gold (half value, rounded up), or buy an item: card value ≥ price, then pay the price in gold. Each item = 1 Fortune ⭐.</div>
+      <div id="market-items"></div>
+      <div id="market-actions">
+        <div class="sellzone" id="sellzone" onclick="trySell()">💰 Sell selected diamond<br><span class="note" id="sellval"></span></div>
+      </div>
+      <div class="starline">Fortune (so far): <span id="fortune-stars"></span> <span class="note">+1⭐ per 6 gold at game end</span></div>
+    </div>
+
+    <div class="board" id="board-tower" style="display:none;">
+      <h2><svg class="emblem"><use href="#fd-tower"/></svg> The Wizard's Tower <span style="font-size:.8rem;color:var(--ink-soft);">(Spirit · any suit)</span></h2>
+      <div class="sub">Build downward-binding wards: any suit may be written, but each floor's value must be strictly lower than the floor beneath it. Build bottom-up.</div>
+      <div id="tower-floors"></div>
+      <div class="forest-rule" id="tower-rule"></div>
+    </div>
+
+    <div class="board" id="board-bog" style="display:none;">
+      <h2><svg class="emblem"><use href="#fd-bog"/></svg> The Beast Bog <span style="font-size:.8rem;color:var(--ink-soft);">(Glory · ♠/♣ only)</span></h2>
+      <div class="sub">Trap beasts by writing a matching pair into a pen. Each pen's value must differ from the other pens. Completing a pen grants Glory and gold equal to half the value (rounded up).</div>
+      <div id="bog-pens"></div>
+    </div>
+
+    <div class="board" id="board-tavern" style="display:none;">
+      <h2><svg class="emblem"><use href="#fd-tavern"/></svg> The Gilded Tavern <span style="font-size:.8rem;color:var(--ink-soft);">(Fortune · ♥/♦ only)</span></h2>
+      <div class="sub">A game of runs: the first value is free; every later value must be exactly one higher or lower than a value already written. No repeats.</div>
+      <div id="tavern-run"></div>
+      <div class="forest-rule" id="tavern-rule"></div>
+    </div>
+
+    <div class="board" id="board-catacombs" style="display:none;">
+      <h2><svg class="emblem"><use href="#fd-catacombs"/></svg> <span class="suitmark">♠</span> Catacombs of the Nameless <span style="font-size:.8rem;color:var(--ink-soft);">(Glory)</span></h2>
+      <div class="sub">A ring of sealed crypts. Your card moves you exactly that many chambers clockwise — you must land on an unopened crypt. Open every crypt for a final blessing.</div>
+      <div id="cata-ring"></div>
+      <div class="forest-rule" id="cata-rule"></div>
+      <div class="starline">Glory earned: <span id="cata-glory"></span></div>
+    </div>
+
+    <div class="board" id="board-warcamp" style="display:none;">
+      <h2><svg class="emblem"><use href="#fd-warcamp"/></svg> <span class="suitmark">♠</span> The War Camp <span style="font-size:.8rem;color:var(--ink-soft);">(Glory)</span></h2>
+      <div class="sub">Muster two battle lines. Add spades to a line, then <b>sound the charge</b> while its sum is 12–18: sums of 15–18 charge harder. A line pushed past 18 is routed and lost.</div>
+      <div id="war-lines"></div>
+      <div class="starline">Glory earned: <span id="war-glory"></span></div>
+    </div>
+
+    <div class="board" id="board-thicket" style="display:none;">
+      <h2><svg class="emblem"><use href="#fd-thicket"/></svg> <span class="suitmark">♣</span> The Deep Thicket <span style="font-size:.8rem;color:var(--ink-soft);">(Lore)</span></h2>
+      <div class="sub">Clear the overgrowth: a club of 1–4 clears 1 cell, 5–9 clears 2, 10–13 clears 3. Cells cleared together must touch each other. Each completed row is Lore; clearing everything is more.</div>
+      <div id="thicket-grid"></div>
+      <div class="forest-rule" id="thicket-rule"></div>
+      <div class="starline">Lore earned: <span id="thicket-lore"></span></div>
+    </div>
+
+    <div class="board" id="board-stones" style="display:none;">
+      <h2><svg class="emblem"><use href="#fd-stones"/></svg> <span class="suitmark">♣</span> The Standing Stones <span style="font-size:.8rem;color:var(--ink-soft);">(Lore)</span></h2>
+      <div class="sub">Raise four stone pairs left to right. Each completed pair's sum must be strictly greater than the pair before it. The song grows louder.</div>
+      <div id="stones-cols"></div>
+      <div class="forest-rule" id="stones-rule"></div>
+      <div class="starline">Lore earned: <span id="stones-lore"></span></div>
+    </div>
+
+    <div class="board" id="board-road" style="display:none;">
+      <h2><svg class="emblem"><use href="#fd-road"/></svg> <span class="suitmark red">♥</span> The Pilgrim Road <span style="font-size:.8rem;color:var(--ink-soft);">(Spirit)</span></h2>
+      <div class="sub">Walk the shrines in one direction only. A heart moves you to the unvisited shrine matching its exact value — every shrine you pass is lost forever.</div>
+      <div id="road-shrines"></div>
+      <div class="forest-rule" id="road-rule"></div>
+      <div class="starline">Spirit earned: <span id="road-spirit"></span></div>
+    </div>
+
+    <div class="board" id="board-oracle" style="display:none;">
+      <h2><svg class="emblem"><use href="#fd-oracle"/></svg> <span class="suitmark red">♥</span> The Veiled Oracle <span style="font-size:.8rem;color:var(--ink-soft);">(Spirit)</span></h2>
+      <div class="sub">Offer a heart and prophesy whether the FIRST card of next turn's Omen Row will be higher or lower than it (ties fulfil the prophecy). A true prophecy is enshrined; a false one is struck from the record.</div>
+      <div id="oracle-slots"></div>
+      <div class="forest-rule" id="oracle-rule"></div>
+      <div class="starline">Spirit earned: <span id="oracle-spirit"></span></div>
+    </div>
+
+    <div class="board" id="board-gemcutter" style="display:none;">
+      <h2><svg class="emblem"><use href="#fd-gemcutter"/></svg> <span class="suitmark red">♦</span> The Gemcutter's Bench <span style="font-size:.8rem;color:var(--ink-soft);">(Fortune)</span></h2>
+      <div class="sub">Cut three flawless settings: the Emerald wants three equal values, the Ruby a strict +1 run, the Diamond exactly 21 across three cards.</div>
+      <div id="gem-rows"></div>
+      <div class="starline">Fortune earned: <span id="gem-fortune"></span></div>
+    </div>
+
+    <div class="board" id="board-traderoute" style="display:none;">
+      <h2><svg class="emblem"><use href="#fd-traderoute"/></svg> <span class="suitmark red">♦</span> The Trade Roads <span style="font-size:.8rem;color:var(--ink-soft);">(Fortune)</span></h2>
+      <div class="sub">Build a connected network: each road needs a diamond of at least its value, and after the first road every new one must touch your network. Reaching towns pays; reaching many towns pays more.</div>
+      <div id="route-map"></div>
+      <div class="forest-rule" id="route-rule"></div>
+      <div class="starline">Fortune earned: <span id="route-fortune"></span></div>
+    </div>
+  </div>
+
+  <div id="logwrap"></div>
+</div>
+
+<!-- ================= DELVE MODAL ================= -->
+<div class="overlay" id="delvemodal" style="display:none;">
+  <div class="modal">
+    <h1>Delve Deeper?</h1>
+    <div id="delve-body"></div>
+  </div>
+</div>
+
+<!-- ================= ASSAULT MODAL ================= -->
+<div class="overlay" id="assaultmodal" style="display:none;">
+  <div class="modal">
+    <h1 id="as-title">🔥 Monster Assault!</h1>
+    <div id="as-body"></div>
+    <div class="center" style="margin-top:16px;">
+      <button class="primary" onclick="closeAssault()" id="as-btn">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= GAME OVER ================= -->
+<div class="overlay" id="overmodal" style="display:none;">
+  <div class="modal">
+    <h1>The Tale is Told</h1>
+    <div class="bigscore" id="final-score"></div>
+    <div class="center" id="final-tier" style="font-size:1.2rem; color:#b8a37e;"></div>
+    <table class="scoretbl" id="final-table"></table>
+    <div class="center" style="margin-top:18px;">
+      <button class="primary" onclick="location.reload()">Play Again</button>
+      <button onclick="openChronicle()">📜 Chronicle</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= CHRONICLE ================= -->
+<div class="overlay" id="chronmodal" style="display:none;">
+  <div class="modal">
+    <h1>📜 The Chronicle</h1>
+    <p class="tagline">Every tale told at this table, kept in your browser's memory.</p>
+    <div id="chron-stats"></div>
+    <table class="scoretbl" id="chron-table"></table>
+    <div id="chron-log"></div>
+    <div class="center" style="margin-top:16px;">
+      <button class="primary" onclick="$('chronmodal').style.display='none'">Close</button>
+      <button onclick="exportChronicle()">⬇ Export JSON</button>
+      <button class="danger" onclick="clearChronicle()">Burn the Records</button>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ==================================================================
+   FLIP DUNGEON v0.3 — solo playtest prototype
+   ================================================================== */
+
+/* ---------- persistence ---------- */
+const K_CUR = 'flipdungeon.current';
+const K_HIST = 'flipdungeon.history';
+const store = {
+  ok:(()=>{ try{ localStorage.setItem('__fd_t','1'); localStorage.removeItem('__fd_t'); return true; }catch(e){ return false; } })(),
+  mem:{},
+  get(k){ try{ return this.ok ? JSON.parse(localStorage.getItem(k)) : (this.mem[k] ?? null); }catch(e){ return null; } },
+  set(k,v){ try{ if(this.ok) localStorage.setItem(k, JSON.stringify(v)); else this.mem[k]=v; }catch(e){} },
+  del(k){ try{ if(this.ok) localStorage.removeItem(k); else delete this.mem[k]; }catch(e){} },
+};
+
+/* ---------- static data ---------- */
+const SUITS = {
+  S:{sym:'♠', red:false, loc:'dungeon', name:'Spades'},
+  C:{sym:'♣', red:false, loc:'forest',  name:'Clubs'},
+  H:{sym:'♥', red:true,  loc:'temple',  name:'Hearts'},
+  D:{sym:'♦', red:true,  loc:'market',  name:'Diamonds'},
+};
+const RANKLBL = {1:'A',11:'J',12:'Q',13:'K'};
+const rlbl = r => RANKLBL[r] || String(r);
+const FACE_EMOJI = {11:'🤹',12:'👸',13:'🤴',1:'🌟'};
+
+const ROOMS = [
+  {t:'F', thr:2,  d:1, name:'Rats in the Dark', em:'🐀', rw:{gold:1}},
+  {t:'T', thr:5,  d:1, name:'Dart Trap',        em:'🎯', rw:{mana:1}},
+  {t:'F', thr:5,  d:1, name:'Goblin Pack',      em:'👺', rw:{gold:2}},
+  {t:'B', thr:7,  d:1, name:'Ogre Gatekeeper',  em:'👹', rw:{glory:1, def:1}},
+  {t:'F', thr:6,  d:2, name:'Skeleton Guard',   em:'💀', rw:{gold:2}},
+  {t:'T', thr:4,  d:2, name:'Pit of Spikes',    em:'🕳️', rw:{xp:1}},
+  {t:'F', thr:8,  d:2, name:'Hungry Wraith',    em:'👻', rw:{glory:1}},
+  {t:'B', thr:10, d:2, name:'Troll Warden',     em:'🧌', rw:{glory:1, def:1}},
+  {t:'F', thr:8,  d:3, name:'Fire Drake',       em:'🐉', rw:{mana:2}},
+  {t:'T', thr:3,  d:3, name:'Cursed Glyphs',    em:'🪬', rw:{xp:2}},
+  {t:'F', thr:10, d:3, name:'Lich Knight',      em:'☠️', rw:{glory:2}},
+  {t:'B', thr:12, d:3, name:'The Thing Below',  em:'🐙', rw:{glory:2, def:1}},
+];
+const FSLOTS = [
+  {em:'🌱', rw:{gold:1}},{em:'🍄', rw:{mana:1}},{em:'🌿', rw:{lore:1}},{em:'🦌', rw:{xp:1}},
+  {em:'🌲', rw:{lore:1}},{em:'🪵', rw:{gold:2}},{em:'🦉', rw:{lore:1}},{em:'🏞️', rw:{lore:2, heal:2}},
+];
+const ALTARS = {
+  sun:  {name:'☀ Sun Altar (odd)',  parity:1, boxes:[{mana:1},{heal:1},{xp:1},{def:1}], t3:20, t2:14},
+  moon: {name:'☾ Moon Altar (even)',parity:0, boxes:[{gold:1},{mana:1},{heal:1},{def:1}], t3:24, t2:16},
+};
+const ITEMS = [
+  {name:'Torch',  em:'🔥', price:2, desc:'Trap limits are +1 more forgiving'},
+  {name:'Boots',  em:'🥾', price:2, desc:'First ±1 tweak each turn is free'},
+  {name:'Shield', em:'🛡️', price:3, desc:'+1 Defense'},
+  {name:'Amulet', em:'📿', price:3, desc:'Suit change costs 1 mana'},
+  {name:'Sword',  em:'⚔️', price:4, desc:'Fight & boss thresholds −1'},
+  {name:'Crown',  em:'👑', price:6, desc:'+2 XP now · worth 2 Fortune ⭐'},
+];
+const UNLOCK_COST = [3, 5, 7];
+const LOCS = {
+  tower: {icon:'🗼', svg:'fd-tower', name:"The Wizard's Tower",
+    blurb:'Any suit. Write 5 floors bottom-up, each strictly lower than the floor below. Big Spirit payoff.'},
+  bog:   {icon:'🐊', svg:'fd-bog', name:'The Beast Bog',
+    blurb:'♠/♣ only. Trap beasts with matching pairs for Glory and gold.'},
+  tavern:{icon:'🍺', svg:'fd-tavern', name:'The Gilded Tavern',
+    blurb:'♥/♦ only. Build a run of adjacent values for gold and Fortune.'},
+};
+const TOWER_FLOORS = [
+  {rw:{mana:1}}, {rw:{xp:1}}, {rw:{spirit:1}}, {rw:{mana:1, gold:1}}, {rw:{spirit:2, def:1}},
+];
+const BOG_GLORY = [1, 1, 2];
+const BOG_EMOJI = ['🐗','🐺','🐻'];
+const TAVERN_BOXES = [
+  {rw:{gold:1}}, {rw:{mana:1}}, {rw:{gold:2}}, {rw:{xp:1}}, {rw:{fortune:2, gold:2}},
+];
+
+const BOARD_POOL = {
+  S:[
+    {id:'dungeon',   svg:'fd-dungeon',   name:'The Dungeon',              mech:'Gated gauntlet — high cards fight, low cards slip traps. Bosses grant Defense; delve for loot.'},
+    {id:'catacombs', svg:'fd-catacombs', name:'Catacombs of the Nameless',mech:'Rondel movement — your value moves you exactly that far around the ring; land only on unopened crypts.'},
+    {id:'warcamp',   svg:'fd-warcamp',   name:'The War Camp',             mech:'Blackjack muster — grow a line\u2019s sum into the 12\u201318 band and charge; overshoot and it routs.'},
+  ],
+  C:[
+    {id:'forest',  svg:'fd-forest',  name:'The Wildwood',      mech:'Rising trail — every value strictly higher than the last.'},
+    {id:'thicket', svg:'fd-thicket', name:'The Deep Thicket',  mech:'Spatial clearing — card size clears 1\u20133 touching cells; complete rows for Lore.'},
+    {id:'stones',  svg:'fd-stones',  name:'The Standing Stones',mech:'Rising sums — each stone pair must out-sum the pair before it.'},
+  ],
+  H:[
+    {id:'temple', svg:'fd-temple', name:'The Twin Temple',  mech:'Parity altars — odd on Sun, even on Moon, no repeats; big sums score big.'},
+    {id:'road',   svg:'fd-road',   name:'The Pilgrim Road', mech:'One-way trail — move to the shrine matching your exact value; passed shrines are lost.'},
+    {id:'oracle', svg:'fd-oracle', name:'The Veiled Oracle',mech:'Prophecy — bet on next turn\u2019s first Omen card, higher or lower; false prophecies burn the slot.'},
+  ],
+  D:[
+    {id:'market',    svg:'fd-market',    name:'The Market',           mech:'Shopping — sell for gold or buy items with value + gold.'},
+    {id:'gemcutter', svg:'fd-gemcutter', name:'The Gemcutter\u2019s Bench', mech:'Pattern rows — three equal, a strict +1 run, and exactly 21.'},
+    {id:'traderoute',svg:'fd-traderoute',name:'The Trade Roads',      mech:'Network — roads need value \u2265 cost and must connect; towns pay out.'},
+  ],
+};
+function boardDef(suit){ return BOARD_POOL[suit].find(b=>b.id===SETTINGS.boards[suit]); }
+
+/* --- new board static data --- */
+const CATA = [
+  {em:'🕯️', rw:{gold:1}}, {em:'⚱️', rw:{mana:1}}, {em:'💀', rw:{glory:1}}, {em:'🕸️', rw:{xp:1}},
+  {em:'🪦', rw:{gold:2}}, {em:'💀', rw:{glory:1}}, {em:'🦴', rw:{mana:1}}, {em:'⚰️', rw:{xp:1}},
+  {em:'💀', rw:{glory:2}}, {em:'🏺', rw:{gold:2}},
+];
+const CATA_BONUS = {glory:1, def:1}; // all 10 opened
+const WAR_LOW=12, WAR_HIGH=18, WAR_STRONG=15, WAR_MAXCARDS=5;
+const THICKET_RW = {1:{gold:1}, 3:{mana:1}, 6:{xp:1}, 9:{gold:1}, 12:{mana:1}, 14:{xp:1}};
+const STONE_RW = [{lore:1},{lore:1,gold:1},{lore:1,mana:1},{lore:2,xp:1}];
+const ROAD_SHRINES = [
+  {v:2, em:'🕯️', rw:{mana:1}}, {v:3, em:'⛩️', rw:{spirit:1}}, {v:4, em:'🌸', rw:{heal:2}},
+  {v:6, em:'⛩️', rw:{spirit:1}}, {v:7, em:'🏮', rw:{gold:2}}, {v:8, em:'⛩️', rw:{spirit:1}},
+  {v:9, em:'🕯️', rw:{mana:2}}, {v:10, em:'🗻', rw:{spirit:2}},
+];
+const ORACLE_RW = [{spirit:1},{spirit:1,mana:1},{spirit:1},{spirit:2,xp:1}];
+const GEMS = {
+  emerald:{em:'💚', name:'Emerald', hint:'three equal values', rw:{fortune:2}},
+  ruby:   {em:'❤️', name:'Ruby',    hint:'a strict +1 run',    rw:{fortune:2}},
+  diamond:{em:'💎', name:'Diamond', hint:'exactly 21 in three',rw:{fortune:2, gold:2}},
+};
+const ROUTE_TOWNS = [
+  {n:'Harbor', x:40,  y:120, rw:{gold:2}},
+  {n:'Mill',   x:95,  y:35,  rw:{mana:1}},
+  {n:'Ford',   x:150, y:120, rw:{gold:1}},
+  {n:'Abbey',  x:205, y:30,  rw:{xp:1}},
+  {n:'Mine',   x:260, y:110, rw:{gold:2, mana:1}},
+  {n:'Keep',   x:150, y:60,  rw:{def:1}},
+];
+const ROUTE_EDGES = [
+  {a:0,b:1,req:3},{a:0,b:2,req:4},{a:1,b:5,req:4},{a:2,b:5,req:5},
+  {a:1,b:3,req:6},{a:2,b:4,req:7},{a:3,b:4,req:8},{a:3,b:5,req:9},
+];
+const ROUTE_STARS = {3:1, 4:1, 5:1, 6:2}; // fortune on reaching Nth town
+
+const CLASSES = {
+  knight:     {icon:'🛡️', name:'Knight',      passive:'+1 Defense.', active:'Once per round: +3 to the selected card, free.'},
+  ranger:     {icon:'🏹', name:'Ranger',      passive:'First ±1 tweak on a club is free.', active:'Once per round: your next trail space ignores the rising rule.'},
+  druid:      {icon:'🌿', name:'Druid',       passive:'Swapping a card between ♣ and ♥ is free.', active:'Once per round: heal 2 and gain 1 mana.'},
+  bard:       {icon:'🎻', name:'Bard',        passive:'Face-card events also grant +1 XP.', active:'Once per round: a soothing song — reduce Threat by 2.'},
+  alchemist:  {icon:'⚗️', name:'Alchemist',   passive:'Camping a card yields 2 gold.', active:'Once per round: flip your hero deck\u2019s top card — number: gain half its value in mana (rounded up); face: fizzle, gain 1 gold.'},
+  necromancer:{icon:'💀', name:'Necromancer', passive:'Wounds cost you only 1 point instead of 2.', active:'Once per round: blood magic — take 1 wound, gain 3 mana.'},
+};
+const DIFFS = {
+  adventurer:{icon:'🌿', name:'Adventurer', desc:'Assault base 2/4/6 · start 3 🪙 1 🔮 · wound cap round+1',
+    base:{1:2,2:4,3:6}, gold:3, mana:1, wcap:1},
+  veteran:   {icon:'⚔️', name:'Veteran',    desc:'Assault base 3/5/8 · start 2 🪙 1 🔮 · wound cap round+1',
+    base:{1:3,2:5,3:8}, gold:2, mana:1, wcap:1},
+  nightmare: {icon:'💀', name:'Nightmare',  desc:'Assault base 4/7/10 · start 2 🪙 0 🔮 · wound cap round+2',
+    base:{1:4,2:7,3:10}, gold:2, mana:0, wcap:2},
+};
+function diff(){ return DIFFS[SETTINGS.diff] || DIFFS.adventurer; }
+function threatBase(round){ return diff().base[round]; }
+
+/* module data */
+const ATTRS = {
+  might:  {suit:'S', icon:'💪', name:'Might',
+    lv:['+1 Defense','Fight & boss thresholds −1','+2⭐ Glory (instant)']},
+  agility:{suit:'C', icon:'🤸', name:'Agility',
+    lv:['Trap limits +1','One free ±1 tweak each turn','+2⭐ Lore (instant)']},
+  wisdom: {suit:'H', icon:'🧠', name:'Wisdom',
+    lv:['+2 🔮 (instant)','Suit changes cost 1 🔮','+2⭐ Spirit (instant)']},
+  spirit: {suit:'D', icon:'🕯️', name:'Spirit',
+    lv:['+3 🪙 (instant)','Camping yields +1 🪙','+2⭐ Fortune (instant)']},
+};
+const TRAIN_REQ = [4,7,10];
+
+const FOLLOWERS = {
+  squire:   {icon:'⚔️', name:'Squire',    desc:'Spend: +2 to the selected card, free.'},
+  herbalist:{icon:'🌿', name:'Herbalist', desc:'Spend: your next trail space ignores the rising rule.'},
+  acolyte:  {icon:'🕯️', name:'Acolyte',   desc:'Spend: your next altar offering ignores odd/even.'},
+  trader:   {icon:'🧺', name:'Trader',    desc:'Spend: gain 2 🪙.'},
+};
+// which spaces recruit which follower (when module on)
+const FOLLOW_SPOTS = {
+  dungeon:{2:'squire', 6:'squire'},
+  forest:{1:'herbalist', 5:'herbalist'},
+  temple:{1:'acolyte'}, // box index 1 on either altar
+};
+
+const SPELLS = [
+  {id:'fireball',  icon:'🔥', name:'Fireball',   mana:2, min:12, desc:'Combined ≥ 12: obliterate the current dungeon room and gain its rewards.'},
+  {id:'divination',icon:'👁️', name:'Divination', mana:1, min:0,  desc:'Sweep the Omen Row and reveal 4 fresh cards (no Threat from the swept ones).'},
+  {id:'transmute', icon:'⚗️', name:'Transmute',  mana:1, min:0,  desc:'Gain gold equal to half the combined value (rounded down).'},
+  {id:'timewarp',  icon:'⏳', name:'Time Warp',  mana:3, min:10, desc:'Combined ≥ 10: gain +1 pick this turn and draw 1 hero card.'},
+];
+
+/* ---------- state ---------- */
+let S = null;
+let SETTINGS = {attrs:false, followers:false, spells:false, pyl:false, diff:'adventurer',
+  boards:{S:'dungeon', C:'forest', H:'temple', D:'market'}};
+let chosenClass = null;
+let chosenDiff = 'adventurer';
+let chosenBoards = {S:'dungeon', C:'forest', H:'temple', D:'market'};
+
+function newDeck(){
+  const d = [];
+  for(const s of Object.keys(SUITS)) for(let r=1;r<=13;r++) d.push({suit:s, rank:r});
+  for(let i=d.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [d[i],d[j]]=[d[j],d[i]]; }
+  return d;
+}
+
+function initState(cls){
+  S = {
+    cls, round:1, turn:1,
+    deck:newDeck(), discard:[],
+    pdeck:newDeck(), pdiscard:[],
+    row:[], hand:[],
+    draftsLeft:2,
+    threat:0,
+    gold:diff().gold, mana:diff().mana, xp:0, wounds:0,
+    glory:0, lore:0, spirit:0, fortune:0,
+    defBonus:0,
+    dungeonNext:0,
+    trail:[],
+    altars:{sun:[], moon:[]},
+    items:{},
+    unlocked:{tower:false, bog:false, tavern:false},
+    unlockCount:0,
+    tower:[], pens:[[],[],[]], run:[],
+    cata:{pos:-1, visited:Array(10).fill(false), done:false},
+    lines:[{vals:[], st:'open'},{vals:[], st:'open'}],
+    grid:Array(16).fill(false), fill:null, // fill:{left, cells:[]}
+    stones:[[],[],[],[]],
+    roadPos:-1,
+    oracle:{slots:[], pending:null},
+    gems:{emerald:[], ruby:[], diamond:[]},
+    routes:{built:Array(8).fill(false), towns:Array(6).fill(false)},
+    attrs:{might:0, agility:0, wisdom:0, spirit:0},
+    followers:{squire:0, herbalist:0, acolyte:0, trader:0},
+    trailBreaks:0, parityBreaks:0,
+    abilityUsed:false,
+    freeTweakUsed:false,
+    spellMode:null, spellFirst:null, // {source, idx}
+    delve:null,   // {depth, lootG, lootM, blacks, flips:[]}
+    assault:null, // {base, def, bonusDef, bonusThreat, flips:[], resolved}
+    active:null,
+    log:[],
+  };
+}
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+function log(msg, cls){ S.log.unshift({msg, cls:cls||'lt'}); renderLog(); }
+function starStr(n){ return n>0 ? '⭐'.repeat(n) : '—'; }
+function attrL(k){ return SETTINGS.attrs ? (S.attrs[k]||0) : 0; }
+function shuffleInPlace(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} }
+function drawAdv(){
+  if(S.deck.length===0){ S.deck=S.discard; S.discard=[]; shuffleInPlace(S.deck);
+    if(S.deck.length===0) return null;
+    log('The adventure deck is reshuffled.', 'sys');
+  }
+  return S.deck.pop();
+}
+function drawHero(){
+  if(S.pdeck.length===0){ S.pdeck=S.pdiscard; S.pdiscard=[]; shuffleInPlace(S.pdeck); }
+  return S.pdeck.pop();
+}
+function totalDefense(){
+  let d = S.defBonus;
+  if(S.cls==='knight') d+=1;
+  if(S.items['Shield']) d+=1;
+  if(attrL('might')>=1) d+=1;
+  return d;
+}
+function activeCard(){
+  if(!S.active) return null;
+  return S.active.source==='row' ? S.row[S.active.idx].card : S.hand[S.active.idx];
+}
+function activeValue(){
+  const c = activeCard(); if(!c) return 0;
+  if(S.active.forced!=null) return S.active.forced;
+  return Math.max(1, Math.min(13, c.rank + S.active.mod));
+}
+function activeSuit(){
+  const c = activeCard(); if(!c) return null;
+  return S.active.suit || c.suit;
+}
+function suitChangeCost(to){
+  const from = activeSuit();
+  if(S.cls==='druid' && from && to &&
+     ((from==='C'&&to==='H')||(from==='H'&&to==='C'))) return 0;
+  return (S.items['Amulet'] || attrL('wisdom')>=2) ? 1 : 2;
+}
+function tweakCost(){
+  const c = activeCard();
+  if((S.items['Boots'] || attrL('agility')>=2) && !S.freeTweakUsed) return 0;
+  if(S.cls==='ranger' && c && c.suit==='C' && !S.active.freeClubUsed) return 0;
+  return 1;
+}
+function isFace(c){ return c.rank>=11; }
+function handLimit(){ return (SETTINGS.pyl && S.wounds>=5) ? 2 : 3; }
+function trapLimit(room){ return room.thr + (S.items['Torch']?1:0) + (attrL('agility')>=1?1:0); }
+function fightNeed(room){ return room.thr - (S.items['Sword']?1:0) - (attrL('might')>=2?1:0); }
+
+/* ---------- rewards ---------- */
+function gainReward(rw, where){
+  const bits=[];
+  if(rw.gold){ S.gold+=rw.gold; bits.push('+'+rw.gold+' 🪙'); }
+  if(rw.mana){ S.mana+=rw.mana; bits.push('+'+rw.mana+' 🔮'); }
+  if(rw.xp){ S.xp+=rw.xp; bits.push('+'+rw.xp+' XP'); }
+  if(rw.glory){ S.glory+=rw.glory; bits.push('+'+rw.glory+'⭐ Glory'); }
+  if(rw.lore){ S.lore+=rw.lore; bits.push('+'+rw.lore+'⭐ Lore'); }
+  if(rw.spirit){ S.spirit+=rw.spirit; bits.push('+'+rw.spirit+'⭐ Spirit'); }
+  if(rw.fortune){ S.fortune+=rw.fortune; bits.push('+'+rw.fortune+'⭐ Fortune'); }
+  if(rw.def){ S.defBonus+=rw.def; bits.push('+'+rw.def+' 🛡'); }
+  if(rw.heal){
+    let healed=0;
+    for(let i=0;i<rw.heal;i++){ if(S.wounds>0){S.wounds--; healed++;} }
+    if(healed) bits.push('healed '+healed+' 🩸'); else bits.push('(no wounds to heal)');
+  }
+  if(bits.length) log((where?where+': ':'')+bits.join(', '), 'good');
+}
+function recruit(kind){
+  if(!SETTINGS.followers) return;
+  S.followers[kind]++;
+  log('A '+FOLLOWERS[kind].icon+' '+FOLLOWERS[kind].name+' joins your camp!', 'sys');
+}
+
+/* ==================================================================
+   SETUP / PERSISTENCE
+   ================================================================== */
+function renderSetup(){
+  const g = $('classgrid');
+  g.innerHTML = Object.entries(CLASSES).map(([k,c])=>`
+    <div class="classcard ${chosenClass===k?'selected':''}" onclick="pickClass('${k}')">
+      <h3><span class="cicon">${c.icon}</span> ${c.name}</h3>
+      <div class="cp"><b>Passive:</b> ${c.passive}</div>
+      <div class="cp"><b>Ability:</b> ${c.active}</div>
+    </div>`).join('');
+  $('startbtn').disabled = !chosenClass;
+  $('resumewrap').style.display = store.get(K_CUR) ? 'block' : 'none';
+  $('boardpick').innerHTML = Object.entries(BOARD_POOL).map(([suit,list])=>`
+    <div class="picklabel">${SUITS[suit].sym} ${SUITS[suit].name} board</div>
+    <div class="pickrow">${list.map(b=>`
+      <div class="classcard ${chosenBoards[suit]===b.id?'selected':''}" onclick="pickBoard('${suit}','${b.id}')">
+        <h3><svg class="emblem" style="color:var(--ink)"><use href="#${b.svg}"/></svg> ${b.name}</h3>
+        <div class="cp">${b.mech}</div>
+      </div>`).join('')}</div>`).join('');
+  $('diffgrid').innerHTML = Object.entries(DIFFS).map(([k,d])=>`
+    <div class="classcard ${chosenDiff===k?'selected':''}" style="flex:1 1 220px;" onclick="pickDiff('${k}')">
+      <h3><span class="cicon">${d.icon}</span> ${d.name}</h3>
+      <div class="cp">${d.desc}</div>
+    </div>`).join('');
+}
+function pickDiff(k){ chosenDiff=k; renderSetup(); }
+function pickBoard(suit,id){ chosenBoards[suit]=id; renderSetup(); }
+function pickClass(k){ chosenClass=k; renderSetup(); }
+function toggleRules(show){ $('rules').style.display = show?'flex':'none'; }
+
+function startGame(){
+  SETTINGS = {
+    attrs: $('mod-attrs').checked,
+    followers: $('mod-followers').checked,
+    spells: $('mod-spells').checked,
+    pyl: $('mod-pyl').checked,
+    diff: chosenDiff,
+    boards: {...chosenBoards},
+  };
+  initState(chosenClass);
+  enterGame();
+  log('You set out as the '+CLASSES[S.cls].name+'. Round 1 begins.', 'sys');
+  const mods = Object.entries(SETTINGS).filter(([k,v])=>v).map(([k])=>k);
+  if(mods.length) log('Experimental modules active: '+mods.join(', ')+'.', 'sys');
+  startRound();
+  startTurn();
+  renderAll();
+}
+function enterGame(){
+  $('setup').style.display='none';
+  $('game').style.display='block';
+  $('attrwrap').style.display = SETTINGS.attrs?'block':'none';
+  $('followwrap').style.display = SETTINGS.followers?'block':'none';
+  for(const k of ['tower','bog','tavern']) $('board-'+k).style.display = S.unlocked[k]?'block':'none';
+  for(const [suit,list] of Object.entries(BOARD_POOL))
+    for(const b of list) $('board-'+b.id).style.display = SETTINGS.boards[suit]===b.id?'block':'none';
+  if(S.delve){ renderDelve(); $('delvemodal').style.display='flex'; }
+  if(S.assault){ renderAssault(); $('assaultmodal').style.display='flex'; $('as-title').textContent='🔥 Monster Assault — Round '+S.round; }
+}
+function saveGame(){
+  store.set(K_CUR, {S, SETTINGS, v:3});
+}
+function resumeGame(){
+  const cur = store.get(K_CUR);
+  if(!cur || !cur.S){ return; }
+  // merge over a fresh shape so new fields never come up undefined
+  initState(cur.S.cls);
+  Object.assign(S, cur.S);
+  SETTINGS = Object.assign({attrs:false,followers:false,spells:false,pyl:false,diff:'adventurer'}, cur.SETTINGS);
+  SETTINGS.boards = Object.assign({S:'dungeon',C:'forest',H:'temple',D:'market'}, cur.SETTINGS && cur.SETTINGS.boards);
+  chosenClass = S.cls;
+  enterGame();
+  log('The tale resumes — Round '+S.round+', Turn '+S.turn+'.', 'sys');
+  renderAll();
+}
+function abandonSave(){
+  if(!confirm('Abandon the saved game?')) return;
+  store.del(K_CUR); renderSetup();
+}
+function quitGame(){
+  if(confirm('Quit to the title screen? Your game is saved and can be resumed.')){
+    saveGame(); location.reload();
+  }
+}
+
+/* ---------- chronicle ---------- */
+function history(){ return store.get(K_HIST) || []; }
+function recordGame(rec){
+  const h = history();
+  h.unshift(rec);
+  store.set(K_HIST, h.slice(0,30));
+}
+function openChronicle(){
+  const h = history();
+  const st = $('chron-stats');
+  if(h.length===0){
+    st.innerHTML = '<span class="note">No completed games yet. Finish a game and it will be recorded here.</span>';
+    $('chron-table').innerHTML=''; $('chron-log').style.display='none';
+  } else {
+    const best = Math.max(...h.map(g=>g.total));
+    const avg = (h.reduce((a,g)=>a+g.total,0)/h.length).toFixed(1);
+    const byClass = {};
+    for(const g of h){ byClass[g.cls] = Math.max(byClass[g.cls]||-999, g.total); }
+    st.innerHTML = `<span class="pill">Games <b>${h.length}</b></span>
+      <span class="pill">Best <b>${best}</b></span>
+      <span class="pill">Average <b>${avg}</b></span>` +
+      Object.entries(byClass).map(([c,s])=>`<span class="pill">${CLASSES[c]?CLASSES[c].icon:''} ${c} best <b>${s}</b></span>`).join('');
+    $('chron-table').innerHTML = `<tr><th>Date</th><th>Hero</th><th>Difficulty</th><th>Modules</th><th>Tier</th><th>Score</th></tr>` +
+      h.map((g,i)=>`<tr class="chronrow" onclick="showChronLog(${i})">
+        <td>${new Date(g.ts).toLocaleString()}</td>
+        <td>${CLASSES[g.cls]?CLASSES[g.cls].icon+' ':''}${g.cls}</td>
+        <td>${g.diff ? (DIFFS[g.diff]?DIFFS[g.diff].icon+' ':'')+g.diff : '—'}</td>
+        <td>${g.modules && g.modules.length ? g.modules.join(', ') : '—'}</td>
+        <td>${g.tier}</td>
+        <td>${g.total}</td></tr>`).join('');
+    $('chron-log').style.display='none';
+  }
+  $('chronmodal').style.display='flex';
+}
+function showChronLog(i){
+  const g = history()[i];
+  if(!g) return;
+  const el = $('chron-log');
+  el.style.display='block';
+  el.innerHTML = `<b style="color:var(--gold)">Play log — ${new Date(g.ts).toLocaleString()} (${g.cls}, ${g.total} pts)</b><br>` +
+    `<span style="color:#8f7c5c">${g.boards? 'Boards: '+Object.values(g.boards).join(', ')+' · ':''}${g.breakdown.map(r=>r[0]+': '+r[1]).join(' · ')}</span><hr style="border-color:#3a2e20; margin:6px 0;">` +
+    (g.log||[]).map(l=>`<div class="${l.cls}">${l.msg}</div>`).join('');
+}
+function exportChronicle(){
+  const data = JSON.stringify(history(), null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'flip-dungeon-chronicle.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function clearChronicle(){
+  if(!confirm('Erase all recorded games? This cannot be undone.')) return;
+  store.del(K_HIST); openChronicle();
+}
+
+/* ==================================================================
+   ROUND / TURN FLOW
+   ================================================================== */
+function startRound(){
+  S.abilityUsed=false;
+  S.trailBreaks=0; S.parityBreaks=0;
+  for(const c of S.hand) S.pdiscard.push(c);
+  S.hand=[];
+  for(let i=0;i<3;i++){ const c=drawHero(); if(c) S.hand.push(c); }
+  log('Round '+S.round+': you draw a fresh Hero Hand of 3 cards.', 'sys');
+}
+
+function startTurn(){
+  for(const slot of S.row){ if(!slot.taken) S.discard.push(slot.card); }
+  S.row=[];
+  for(let i=0;i<4;i++){ const c=drawAdv(); if(c) S.row.push({card:c, taken:false}); }
+  S.draftsLeft=2;
+  S.freeTweakUsed=false;
+  resolveProphecy();
+  S.active=null; S.spellMode=null; S.spellFirst=null;
+  if(S.hand.length<handLimit()){
+    const c=drawHero();
+    if(c){ S.hand.push(c); log('You draw the '+rlbl(c.rank)+SUITS[c.suit].sym+' into your Hero Hand.','lt'); }
+  }
+  if(SETTINGS.pyl && S.wounds>=5) log('You are Battered (5+ wounds): hand limit 2.', 'bad');
+}
+
+function endTurn(){
+  if(S.fill){ log('Finish clearing the Thicket cells first.', 'bad'); return; }
+  if(S.draftsLeft>0 && !confirm('You still have '+S.draftsLeft+' pick(s) left. End the turn anyway?')) return;
+  S.active=null; S.spellMode=null; S.spellFirst=null;
+  const faces = S.row.filter(s=>!s.taken && isFace(s.card)).length;
+  if(faces>0){ S.threat+=faces; log('Leftover face cards stir the horde: +'+faces+' 🔥 Threat.', 'bad'); }
+  if(S.turn===5){ resolveAssault(); return; }
+  S.turn++;
+  startTurn();
+  log('— Turn '+S.turn+' —', 'sys');
+  renderAll();
+}
+
+/* ---------- assault ---------- */
+function resolveAssault(){
+  S.assault = {base:threatBase(S.round)+S.threat, def:totalDefense(), bonusDef:0, bonusThreat:0, flips:[], resolved:false};
+  S.threat = 0;
+  $('as-title').textContent = '🔥 Monster Assault — Round '+S.round;
+  $('assaultmodal').style.display='flex';
+  if(SETTINGS.pyl) renderAssault();
+  else resolveAssaultNow();
+  renderAll();
+}
+function lastStandFlip(){
+  const a=S.assault;
+  if(!a || a.resolved) return;
+  const c = drawAdv();
+  if(!c) return;
+  a.flips.push(c);
+  S.discard.push(c);
+  if(SUITS[c.suit].red){ a.bonusDef++; log('Last Stand: the '+rlbl(c.rank)+SUITS[c.suit].sym+' rallies to you — +1 🛡.', 'good'); }
+  else { a.bonusThreat++; log('Last Stand: the '+rlbl(c.rank)+SUITS[c.suit].sym+' emboldens the horde — +1 🔥.', 'bad'); }
+  renderAssault();
+}
+function resolveAssaultNow(){
+  const a = S.assault;
+  if(!a || a.resolved) return;
+  a.resolved = true;
+  const threat = a.base + a.bonusThreat;
+  const def = a.def + a.bonusDef;
+  if(def>=threat){
+    const g = S.round===3?2:1;
+    a.outcome = {win:true, g};
+    S.glory+=g; S.xp+=1;
+    log('Assault repelled! +'+g+'⭐ Glory, +1 XP.', 'good');
+    if(SETTINGS.followers) recruit('squire');
+  } else {
+    const cap = S.round + diff().wcap;
+    const w = Math.min(threat-def, cap);
+    a.outcome = {win:false, w};
+    S.wounds+=w;
+    log('Assault breaks through: +'+w+' 🩸 Wounds.', 'bad');
+    if(SETTINGS.pyl && S.wounds>=5) log('You are Battered (5+ wounds): hand limit 2.', 'bad');
+  }
+  renderAssault();
+  renderAll();
+}
+function renderAssault(){
+  const a = S.assault;
+  if(!a) return;
+  const threat = a.base + a.bonusThreat;
+  const def = a.def + a.bonusDef;
+  let html = `<div class="center"><svg class="emblem big" style="color:var(--danger)"><use href="#fd-horde"/></svg></div>
+    <p class="center">At dusk of Round ${S.round}, the horde descends on the camp.</p>`;
+  html += `<p class="center" style="font-size:1.15rem;">🔥 Threat <b style="color:var(--danger)">${threat}</b> &nbsp;vs&nbsp; 🛡 Defense <b style="color:#9fc98f">${def}</b></p>`;
+  html += `<div class="threatbar center" style="justify-content:center;">`;
+  for(let i=0;i<Math.max(threat,def);i++){
+    html += `<div class="tseg ${i<def?'def':(i<threat?'hot':'')}"></div>`;
+  }
+  html += `</div>`;
+  if(a.flips.length){
+    html += `<div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:8px 0;">${a.flips.map(c=>cardHTML(c,'small','')).join('')}</div>`;
+  }
+  if(!a.resolved){
+    html += `<p class="center note">Make a <b>Last Stand</b>? Each flipped red card is +1 🛡 for this battle — each black card is +1 🔥.</p>
+      <div class="center" style="margin-top:12px;">
+        <button class="danger" onclick="lastStandFlip()">🎲 Flip a card</button>
+        <button class="primary" onclick="resolveAssaultNow()">⚔ Stand and resolve</button>
+      </div>`;
+    $('as-btn').style.display='none';
+  } else {
+    if(a.outcome.win){
+      html += `<p class="center" style="color:#9fc98f; font-size:1.05rem;"><b>The line holds!</b> You gain +${a.outcome.g}⭐ Glory and +1 XP.</p>`;
+      if(SETTINGS.followers) html += `<p class="center" style="color:#9fc98f;">A ⚔ Squire, impressed by the defense, joins your camp.</p>`;
+    } else {
+      const wc = S.cls==='necromancer'?1:2;
+      html += `<p class="center" style="color:#d98a7f; font-size:1.05rem;"><b>The monsters break through!</b> You suffer <b>${a.outcome.w}</b> Wound${a.outcome.w>1?'s':''} (−${wc} pt${wc>1?'s':''} each; heal at the Temple).</p>`;
+    }
+    $('as-btn').style.display='inline-block';
+    $('as-btn').textContent = S.round===3 ? 'Final Scoring' : 'Continue to Round '+(S.round+1);
+  }
+  $('as-body').innerHTML = html;
+}
+function closeAssault(){
+  if(S.assault && !S.assault.resolved) resolveAssaultNow();
+  S.assault = null;
+  $('assaultmodal').style.display='none';
+  if(S.round===3){ finalScore(); return; }
+  S.round++; S.turn=1;
+  startRound();
+  startTurn();
+  log('— Round '+S.round+', Turn 1 —', 'sys');
+  renderAll();
+}
+
+/* ---------- final scoring ---------- */
+function finalScore(){
+  const goldStars = Math.floor(S.gold/6);
+  const fortune = S.fortune + goldStars;
+  const stars = S.glory + S.lore + S.spirit + fortune;
+  const wc = S.cls==='necromancer'?1:2;
+  const total = stars*2 + S.xp - S.wounds*wc;
+  const rows = [
+    ['Glory ⭐ ('+S.glory+' × 2)', S.glory*2],
+    ['Lore ⭐ ('+S.lore+' × 2)', S.lore*2],
+    ['Spirit ⭐ ('+S.spirit+' × 2)', S.spirit*2],
+    ['Fortune ⭐ ('+S.fortune+' items'+(goldStars?(' + '+goldStars+' from gold hoard'):'')+') × 2', fortune*2],
+    ['Experience (1 pt each)', S.xp],
+    ['Wounds (−'+wc+' pt'+(wc>1?'s':'')+' each'+(S.cls==='necromancer'?', Necromancer':'')+')', -S.wounds*wc],
+  ];
+  $('final-score').textContent = total + ' points';
+  let tier='Village Peasant';
+  if(total>=25) tier='Wandering Adventurer';
+  if(total>=40) tier='Hero of the Realm';
+  if(total>=55) tier='Champion of Legend';
+  if(total>=70) tier='Mythic Slayer';
+  if(total>=85) tier='Living Legend';
+  $('final-tier').textContent = '“'+tier+'”';
+  $('final-table').innerHTML = rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]>=0?'+':''}${r[1]}</td></tr>`).join('')
+    + `<tr><td><b>Total</b></td><td><b>${total}</b></td></tr>`;
+  $('overmodal').style.display='flex';
+  // record & clear autosave
+  recordGame({
+    ts:Date.now(), cls:S.cls, total, tier, diff:SETTINGS.diff, boards:{...SETTINGS.boards},
+    modules:Object.entries(SETTINGS).filter(([k,v])=>v).map(([k])=>k),
+    breakdown:rows,
+    stats:{glory:S.glory, lore:S.lore, spirit:S.spirit, fortune, xp:S.xp, wounds:S.wounds,
+           gold:S.gold, unlocks:S.unlockCount, dungeonRooms:S.dungeonNext},
+    log:[...S.log].reverse(),
+  });
+  store.del(K_CUR);
+}
+
+/* ==================================================================
+   CARD SELECTION & MODIFICATION
+   ================================================================== */
+function selectRow(i){
+  const slot = S.row[i];
+  if(S.fill){ log('Finish clearing the Thicket cells first.', 'bad'); return; }
+  if(!slot || slot.taken) return;
+  if(S.spellMode){ spellPickSecond('row', i); return; }
+  if(S.active && S.active.source==='row' && S.active.idx===i){ S.active=null; renderAll(); return; }
+  if(S.draftsLeft<=0){ log('No picks left this turn — but you can still play Hero Hand cards.', 'bad'); return; }
+  S.active={source:'row', idx:i, mod:0, suit:null, forced:null, freeClubUsed:false};
+  renderAll();
+}
+function selectHand(i){
+  if(S.fill){ log('Finish clearing the Thicket cells first.', 'bad'); return; }
+  if(!S.hand[i]) return;
+  if(S.spellMode){ spellPickSecond('hand', i); return; }
+  if(S.active && S.active.source==='hand' && S.active.idx===i){ S.active=null; renderAll(); return; }
+  S.active={source:'hand', idx:i, mod:0, suit:null, forced:null, freeClubUsed:false};
+  renderAll();
+}
+function modVal(delta){
+  if(!S.active) return;
+  const c = activeCard();
+  if(isFace(c)) return;
+  const cost = tweakCost();
+  if(S.gold < cost){ log('Not enough gold to tweak the card.', 'bad'); return; }
+  const nv = activeValue()+delta;
+  if(nv<1 || nv>13){ log('Value must stay between 1 and 13.', 'bad'); return; }
+  S.gold -= cost;
+  if(cost===0){
+    if((S.items['Boots'] || attrL('agility')>=2) && !S.freeTweakUsed) S.freeTweakUsed=true;
+    else S.active.freeClubUsed=true;
+  }
+  if(S.active.forced!=null) S.active.forced = nv; else S.active.mod += delta;
+  log('Card tweaked to '+activeValue()+(cost?(' (−'+cost+' 🪙)'):' (free)')+'.', 'lt');
+  renderAll();
+}
+function modSuit(s){
+  if(!S.active) return;
+  const c = activeCard();
+  if(isFace(c)) return;
+  if(activeSuit()===s) return;
+  const cost = suitChangeCost(s);
+  if(S.mana<cost){ log('Not enough mana to change the suit.', 'bad'); return; }
+  S.mana-=cost;
+  S.active.suit=s;
+  log('Suit changed to '+SUITS[s].sym+(cost?' (−'+cost+' 🔮)':' (free — Druid)')+'.', 'lt');
+  renderAll();
+}
+function consumeActive(){
+  if(S.active.source==='row'){
+    S.row[S.active.idx].taken=true;
+    S.discard.push(S.row[S.active.idx].card);
+    S.draftsLeft--;
+  } else {
+    S.pdiscard.push(S.hand[S.active.idx]);
+    S.hand.splice(S.active.idx,1);
+  }
+  S.active=null;
+}
+
+/* ---------- face events ---------- */
+function playEvent(choice){
+  const c = activeCard(); if(!c || !isFace(c)) return;
+  const src = S.active.source==='hand' ? 'Hero Hand' : 'Omen Row';
+  if(c.rank===11){
+    S.gold+=3; log('Jack ('+src+'): the scoundrel fences goods, +3 🪙.', 'good');
+    if(SETTINGS.followers) recruit('trader');
+  }
+  if(c.rank===12){
+    if(choice==='mana'){ S.mana+=2; log('Queen ('+src+'): +2 🔮.', 'good'); }
+    else { gainReward({heal:2}, 'Queen'); }
+  }
+  if(c.rank===13){ S.xp+=1; S.threat=Math.max(0,S.threat-1); log('King ('+src+'): +1 XP and the horde falters, −1 🔥 Threat.', 'good'); }
+  if(S.cls==='bard'){ S.xp+=1; log('Bard: the court applauds — +1 XP.', 'good'); }
+  consumeActive();
+  renderAll();
+}
+function campCard(){
+  const c = activeCard(); if(!c || isFace(c)) return;
+  let g = 1;
+  if(S.cls==='alchemist') g+=1;
+  if(attrL('spirit')>=2) g+=1;
+  S.gold+=g;
+  log('You camp with the '+rlbl(c.rank)+SUITS[c.suit].sym+' — +'+g+' 🪙.', 'lt');
+  consumeActive();
+  renderAll();
+}
+
+/* ==================================================================
+   LOCATION LEGALITY & ASSIGNMENT
+   ================================================================== */
+function canDungeon(){
+  const c=activeCard();
+  if(SETTINGS.boards.S!=='dungeon') return false;
+  if(!c || isFace(c) || activeSuit()!=='S') return false;
+  if(S.dungeonNext>=ROOMS.length) return false;
+  const room=ROOMS[S.dungeonNext];
+  const v=activeValue();
+  return room.t==='T' ? v<=trapLimit(room) : v>=fightNeed(room);
+}
+function doDungeon(){
+  if(!canDungeon()) return;
+  const room=ROOMS[S.dungeonNext];
+  const c=activeCard(); const v=activeValue();
+  const idx=S.dungeonNext;
+  S.dungeonNext++;
+  const kind = room.t==='T'?'slip past':'defeat';
+  log('Dungeon: you '+kind+' the '+room.em+' '+room.name+' with a '+v+'.', 'good');
+  gainReward(room.rw, room.name);
+  if(SETTINGS.followers && FOLLOW_SPOTS.dungeon[idx]) recruit(FOLLOW_SPOTS.dungeon[idx]);
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  if(S.dungeonNext<ROOMS.length && ROOMS[S.dungeonNext].d!==room.d){
+    log('You descend to depth '+ROOMS[S.dungeonNext].d+'…', 'sys');
+  }
+  consumeActive(); renderAll();
+  if(SETTINGS.pyl) openDelve(room.d);
+}
+
+/* ---------- PYL: the Delve ---------- */
+function openDelve(depth){
+  S.delve = {depth, lootG:0, lootM:0, blacks:0, flips:[]};
+  renderDelve();
+  $('delvemodal').style.display='flex';
+  saveGame();
+}
+function delveFlip(){
+  if(!S.delve) return;
+  const c = drawAdv();
+  if(!c){ delveBank(); return; }
+  S.delve.flips.push(c);
+  S.discard.push(c);
+  if(SUITS[c.suit].red){
+    S.delve.lootG += S.delve.depth;
+    if(isFace(c)) S.delve.lootM += 1;
+  } else {
+    if(isFace(c)){ delveBust(c); return; }
+    S.delve.blacks++;
+    if(S.delve.blacks>=2){ delveBust(c); return; }
+  }
+  renderDelve();
+}
+function delveBust(c){
+  S.wounds += 1;
+  log('Delve: the '+rlbl(c.rank)+SUITS[c.suit].sym+' springs an ambush — you flee with nothing and take 1 🩸 Wound!', 'bad');
+  if(SETTINGS.pyl && S.wounds===5) log('You are Battered (5+ wounds): hand limit 2.', 'bad');
+  S.delve.busted = c;
+  renderDelve();
+}
+function delveBank(){
+  if(!S.delve) return;
+  if(!S.delve.busted && (S.delve.lootG || S.delve.lootM)){
+    S.gold += S.delve.lootG; S.mana += S.delve.lootM;
+    log('Delve: you slip out with +'+S.delve.lootG+' 🪙'+(S.delve.lootM?(' and +'+S.delve.lootM+' 🔮'):'')+'.', 'good');
+  } else if(!S.delve.busted){
+    log('Delve: you leave the shadows untouched.', 'lt');
+  }
+  S.delve = null;
+  $('delvemodal').style.display='none';
+  renderAll();
+}
+function renderDelve(){
+  if(!S.delve) return;
+  const d = S.delve;
+  let html = `<div class="center"><svg class="emblem big" style="color:var(--gold)"><use href="#fd-delve"/></svg></div>
+    <p class="center">The ${ROOMS[Math.max(0,S.dungeonNext-1)].em} room falls silent. Unseen alcoves glitter at depth ${d.depth}…</p>
+    <p class="center note">Each red card banks <b>${d.depth} 🪙</b> (red faces add 1 🔮). One black number is a peril — a second, or any black face, is an ambush: lose it all and take a Wound.</p>
+    <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin:10px 0;">
+      ${d.flips.map(c=>cardHTML(c,'small','')).join('') || '<span class="note">No cards flipped yet.</span>'}
+    </div>
+    <p class="center">Unbanked loot: <b style="color:var(--gold)">${d.lootG} 🪙${d.lootM?' + '+d.lootM+' 🔮':''}</b> · Perils: <b style="color:var(--danger)">${d.blacks}/2</b></p>`;
+  if(d.busted){
+    html += `<p class="center" style="color:#d98a7f; font-size:1.05rem;"><b>Ambush!</b> The loot is lost and you take 1 Wound.</p>
+      <div class="center" style="margin-top:12px;"><button class="primary" onclick="delveBank()">Limp away</button></div>`;
+  } else {
+    html += `<div class="center" style="margin-top:12px;">
+      <button class="danger" onclick="delveFlip()">🎲 Flip a card</button>
+      <button class="primary" onclick="delveBank()">💰 Bank &amp; leave</button>
+    </div>`;
+  }
+  $('delve-body').innerHTML = html;
+}
+
+/* ---------- PYL: overdraw ---------- */
+function overdraw(){
+  if(!SETTINGS.pyl || S.hand.length>=handLimit()) return;
+  const c = drawHero();
+  if(!c){ log('Your hero deck is spent.', 'bad'); return; }
+  if(isFace(c)){
+    S.pdiscard.push(c);
+    S.threat += 1;
+    log('Overdraw: the '+rlbl(c.rank)+SUITS[c.suit].sym+' slips away to the horde — +1 🔥 Threat!', 'bad');
+  } else {
+    S.hand.push(c);
+    log('Overdraw: the '+rlbl(c.rank)+SUITS[c.suit].sym+' joins your hand.', 'good');
+  }
+  renderAll();
+}
+
+function canForest(){
+  const c=activeCard();
+  if(SETTINGS.boards.C!=='forest') return false;
+  if(!c || isFace(c) || activeSuit()!=='C') return false;
+  if(S.trail.length>=FSLOTS.length) return false;
+  const v=activeValue();
+  if(S.trail.length===0) return true;
+  if(S.trailBreaks>0) return true;
+  return v>S.trail[S.trail.length-1];
+}
+function doForest(){
+  if(!canForest()) return;
+  const c=activeCard(); const v=activeValue();
+  const idx=S.trail.length;
+  const usedBreak = idx>0 && v<=S.trail[idx-1];
+  S.trail.push(v);
+  if(usedBreak){ S.trailBreaks--; log('The rising rule is bypassed for this space.', 'sys'); }
+  log('Wildwood: you blaze the trail with a '+v+'.', 'good');
+  gainReward(FSLOTS[idx].rw, 'Trail '+(idx+1));
+  if(SETTINGS.followers && FOLLOW_SPOTS.forest[idx]) recruit(FOLLOW_SPOTS.forest[idx]);
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  consumeActive(); renderAll();
+}
+
+function canAltar(key){
+  const c=activeCard();
+  if(SETTINGS.boards.H!=='temple') return false;
+  if(!c || isFace(c) || activeSuit()!=='H') return false;
+  const a=ALTARS[key]; const vals=S.altars[key];
+  if(vals.length>=4) return false;
+  const v=activeValue();
+  if(v%2!==a.parity && S.parityBreaks<=0) return false;
+  if(vals.includes(v)) return false;
+  return true;
+}
+function doAltar(key){
+  if(!canAltar(key)) return;
+  const c=activeCard(); const v=activeValue();
+  const a=ALTARS[key]; const idx=S.altars[key].length;
+  if(v%2!==a.parity){ S.parityBreaks--; log('The Acolyte intercedes — parity is ignored.', 'sys'); }
+  S.altars[key].push(v);
+  log('Temple: you inscribe a '+v+' on the '+a.name.replace(/ \(.*/,'')+'.', 'good');
+  gainReward(a.boxes[idx], 'Altar offering');
+  if(SETTINGS.followers && FOLLOW_SPOTS.temple[idx]) recruit(FOLLOW_SPOTS.temple[idx]);
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  if(S.altars[key].length===4){
+    const sum=S.altars[key].reduce((x,y)=>x+y,0);
+    const sp = sum>=a.t3?3 : sum>=a.t2?2 : 1;
+    S.spirit+=sp;
+    log('The altar is complete (sum '+sum+')! +'+sp+'⭐ Spirit.', 'good');
+  }
+  consumeActive(); renderAll();
+}
+
+function itemCost(it){ return it.price; }
+function canBuy(i){
+  const it=ITEMS[i]; const c=activeCard();
+  if(SETTINGS.boards.D!=='market') return false;
+  if(!c || isFace(c) || activeSuit()!=='D') return false;
+  if(S.items[it.name]) return false;
+  return activeValue()>=it.price && S.gold>=itemCost(it);
+}
+function doBuy(i){
+  if(!canBuy(i)) return;
+  const it=ITEMS[i]; const c=activeCard();
+  S.gold-=itemCost(it);
+  S.items[it.name]=true;
+  S.fortune += (it.name==='Crown'?2:1);
+  log('Market: you buy the '+it.em+' '+it.name+' for '+itemCost(it)+' 🪙.', 'good');
+  if(it.name==='Crown'){ S.xp+=2; log('The Crown gleams: +2 XP.', 'good'); }
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  consumeActive(); renderAll();
+}
+function canSell(){
+  const c=activeCard();
+  if(SETTINGS.boards.D!=='market') return false;
+  return !!(c && !isFace(c) && activeSuit()==='D');
+}
+function trySell(){
+  if(!canSell()) return;
+  const c=activeCard(); const v=activeValue();
+  const g=Math.ceil(v/2);
+  S.gold+=g;
+  log('Market: you sell wares worth '+v+' for +'+g+' 🪙.', 'good');
+  if(SETTINGS.followers && v>=8) recruit('trader');
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  consumeActive(); renderAll();
+}
+
+/* ---------- guild unlocks & extra locations ---------- */
+function unlockCost(){ return UNLOCK_COST[Math.min(S.unlockCount, UNLOCK_COST.length-1)]; }
+function unlockLoc(key){
+  if(S.unlocked[key]) return;
+  const cost = unlockCost();
+  if(S.xp < cost){ log('You need '+cost+' XP to charter '+LOCS[key].name+'.', 'bad'); return; }
+  S.xp -= cost;
+  S.unlocked[key]=true;
+  S.unlockCount++;
+  log('⚜ The Guild charters '+LOCS[key].name+' for '+cost+' XP! A new adventure opens.', 'sys');
+  const b=$('board-'+key); b.style.display='block'; b.classList.add('flash');
+  renderAll();
+}
+
+function canTower(){
+  const c=activeCard();
+  if(!S.unlocked.tower || !c || isFace(c)) return false;
+  if(S.tower.length>=TOWER_FLOORS.length) return false;
+  const v=activeValue();
+  if(S.tower.length===0) return true;
+  return v < S.tower[S.tower.length-1];
+}
+function doTower(){
+  if(!canTower()) return;
+  const c=activeCard(); const v=activeValue();
+  const idx=S.tower.length;
+  S.tower.push(v);
+  log('Tower: you inscribe a '+v+' ward on floor '+(idx+1)+'.', 'good');
+  gainReward(TOWER_FLOORS[idx].rw, 'Floor '+(idx+1));
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  if(S.tower.length===TOWER_FLOORS.length) log('The Tower is complete — its wards hum with power!', 'sys');
+  consumeActive(); renderAll();
+}
+
+function canPen(i){
+  const c=activeCard();
+  if(!S.unlocked.bog || !c || isFace(c)) return false;
+  const su=activeSuit();
+  if(su!=='S' && su!=='C') return false;
+  const pen=S.pens[i]; const v=activeValue();
+  if(pen.length>=2) return false;
+  if(pen.length===1) return v===pen[0];
+  return !S.pens.some((p,j)=> j!==i && p.length>0 && p[0]===v);
+}
+function doPen(i){
+  if(!canPen(i)) return;
+  const c=activeCard(); const v=activeValue();
+  S.pens[i].push(v);
+  if(S.pens[i].length===1){
+    log('Bog: you bait pen '+(i+1)+' with a '+v+'. Now match it!', 'good');
+  } else {
+    const g=Math.ceil(v/2);
+    S.glory+=BOG_GLORY[i]; S.gold+=g;
+    log('Bog: a '+BOG_EMOJI[i]+' beast of strength '+v+' is trapped in pen '+(i+1)+'! +'+BOG_GLORY[i]+'⭐ Glory, +'+g+' 🪙.', 'good');
+  }
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  consumeActive(); renderAll();
+}
+
+function canTavern(){
+  const c=activeCard();
+  if(!S.unlocked.tavern || !c || isFace(c)) return false;
+  const su=activeSuit();
+  if(su!=='H' && su!=='D') return false;
+  if(S.run.length>=TAVERN_BOXES.length) return false;
+  const v=activeValue();
+  if(S.run.includes(v)) return false;
+  if(S.run.length===0) return true;
+  return S.run.some(x=> Math.abs(x-v)===1);
+}
+function doTavern(){
+  if(!canTavern()) return;
+  const c=activeCard(); const v=activeValue();
+  const idx=S.run.length;
+  S.run.push(v);
+  log('Tavern: you play a '+v+' into the run ['+[...S.run].sort((a,b)=>a-b).join('-')+'].', 'good');
+  gainReward(TAVERN_BOXES[idx].rw, 'Run card '+(idx+1));
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  if(S.run.length===TAVERN_BOXES.length) log('The whole tavern cheers — a perfect run!', 'sys');
+  consumeActive(); renderAll();
+}
+
+
+/* ==================================================================
+   NEW ADVENTURE BOARDS
+   ================================================================== */
+/* --- Catacombs (rondel movement) --- */
+function cataTarget(){ return (S.cata.pos + activeValue()) % 10; }
+function canCata(){
+  const c=activeCard();
+  if(SETTINGS.boards.S!=='catacombs') return false;
+  if(!c || isFace(c) || activeSuit()!=='S') return false;
+  if(S.cata.visited.every(x=>x)) return false;
+  return !S.cata.visited[cataTarget()];
+}
+function doCata(){
+  if(!canCata()) return;
+  const c=activeCard();
+  const t=cataTarget();
+  S.cata.pos=t; S.cata.visited[t]=true;
+  log('Catacombs: you step '+activeValue()+' chambers to crypt '+(t+1)+' and pry it open.', 'good');
+  gainReward(CATA[t].rw, 'Crypt '+(t+1));
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  if(S.cata.visited.every(x=>x) && !S.cata.done){
+    S.cata.done=true;
+    gainReward(CATA_BONUS, 'The Nameless blesses you');
+  }
+  consumeActive(); renderAll();
+}
+
+/* --- War Camp (sum band muster) --- */
+function lineSum(i){ return S.lines[i].vals.reduce((a,b)=>a+b,0); }
+function canLine(i){
+  const c=activeCard();
+  if(SETTINGS.boards.S!=='warcamp') return false;
+  if(!c || isFace(c) || activeSuit()!=='S') return false;
+  const L=S.lines[i];
+  return L.st==='open' && L.vals.length<WAR_MAXCARDS;
+}
+function doLine(i){
+  if(!canLine(i)) return;
+  const c=activeCard(); const v=activeValue();
+  S.lines[i].vals.push(v);
+  const sum=lineSum(i);
+  log('War Camp: a '+v+' joins line '+(i+1)+' (sum '+sum+').', 'good');
+  if(sum>WAR_HIGH){
+    S.lines[i].st='routed';
+    log('Line '+(i+1)+' overextends past '+WAR_HIGH+' and is ROUTED — its glory is lost!', 'bad');
+  }
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  consumeActive(); renderAll();
+}
+function canCharge(i){
+  const L=S.lines[i];
+  return SETTINGS.boards.S==='warcamp' && L.st==='open' && lineSum(i)>=WAR_LOW && lineSum(i)<=WAR_HIGH;
+}
+function chargeLine(i){
+  if(!canCharge(i)) return;
+  const sum=lineSum(i);
+  S.lines[i].st='charged';
+  const rw = sum>=WAR_STRONG ? {glory:2, def:1} : {glory:1, def:1};
+  log('⚔ Line '+(i+1)+' sounds the charge at strength '+sum+'!', 'sys');
+  gainReward(rw, 'The charge');
+  renderAll();
+}
+
+/* --- Deep Thicket (spatial clearing) --- */
+function fillCount(v){ return v<=4?1 : v<=9?2 : 3; }
+function canThicket(){
+  const c=activeCard();
+  if(SETTINGS.boards.C!=='thicket') return false;
+  if(!c || isFace(c) || activeSuit()!=='C') return false;
+  if(S.fill) return false;
+  return S.grid.some(x=>!x);
+}
+function doThicketStart(){
+  if(!canThicket()) return;
+  const c=activeCard();
+  const n=Math.min(fillCount(activeValue()), S.grid.filter(x=>!x).length);
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  consumeActive();
+  S.fill={left:n, cells:[]};
+  log('Thicket: clear '+n+' touching cell'+(n>1?'s':'')+' — click them on the grid.', 'sys');
+  renderAll();
+}
+function thicketLegalCells(){
+  const out=[];
+  for(let i=0;i<16;i++){
+    if(S.grid[i]) continue;
+    if(S.fill.cells.length===0){ out.push(i); continue; }
+    const r=Math.floor(i/4), c=i%4;
+    const adj = S.fill.cells.some(j=>{
+      const jr=Math.floor(j/4), jc=j%4;
+      return Math.abs(jr-r)+Math.abs(jc-c)===1;
+    });
+    if(adj) out.push(i);
+  }
+  return out;
+}
+function fillThicketCell(i){
+  if(!S.fill || S.grid[i] || !thicketLegalCells().includes(i)) return;
+  S.grid[i]=true;
+  S.fill.cells.push(i);
+  S.fill.left--;
+  if(THICKET_RW[i]) gainReward(THICKET_RW[i], 'Clearing');
+  const r=Math.floor(i/4);
+  if([0,1,2,3].every(c=>S.grid[r*4+c]) && !S['thicketRow'+r]){
+    S['thicketRow'+r]=true;
+    gainReward({lore:1}, 'Row '+(r+1)+' cleared');
+  }
+  if(S.fill.left<=0 || thicketLegalCells().length===0){
+    S.fill=null;
+    if(S.grid.every(x=>x)) gainReward({lore:1}, 'The Thicket lies open');
+  }
+  renderAll();
+}
+
+/* --- Standing Stones (rising sums) --- */
+function stonesCol(){ return S.stones.findIndex(col=>col.length<2); }
+function prevStoneSum(){
+  let best=0;
+  for(const col of S.stones){ if(col.length===2) best=col[0]+col[1]; else break; }
+  return best;
+}
+function canStones(){
+  const c=activeCard();
+  if(SETTINGS.boards.C!=='stones') return false;
+  if(!c || isFace(c) || activeSuit()!=='C') return false;
+  const k=stonesCol();
+  if(k<0) return false;
+  const col=S.stones[k];
+  if(col.length===0) return true;
+  return col[0]+activeValue() > prevStoneSum();
+}
+function doStones(){
+  if(!canStones()) return;
+  const c=activeCard(); const v=activeValue();
+  const k=stonesCol();
+  S.stones[k].push(v);
+  if(S.stones[k].length===2){
+    const sum=S.stones[k][0]+S.stones[k][1];
+    log('Standing Stones: pair '+(k+1)+' rises with sum '+sum+'.', 'good');
+    gainReward(STONE_RW[k], 'Stone pair '+(k+1));
+  } else {
+    log('Standing Stones: a '+v+' is set — its partner must push the sum past '+prevStoneSum()+'.', 'good');
+  }
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  consumeActive(); renderAll();
+}
+
+/* --- Pilgrim Road (one-way exact trail) --- */
+function canRoad(){
+  const c=activeCard();
+  if(SETTINGS.boards.H!=='road') return false;
+  if(!c || isFace(c) || activeSuit()!=='H') return false;
+  const v=activeValue();
+  return ROAD_SHRINES.some((s,i)=> i>S.roadPos && s.v===v);
+}
+function doRoad(){
+  if(!canRoad()) return;
+  const c=activeCard(); const v=activeValue();
+  const i=ROAD_SHRINES.findIndex((s,j)=> j>S.roadPos && s.v===v);
+  const skipped=i-S.roadPos-1;
+  S.roadPos=i;
+  log('Pilgrim Road: you walk to the '+ROAD_SHRINES[i].em+' shrine of '+v+(skipped>0?' — '+skipped+' shrine'+(skipped>1?'s':'')+' pass forever behind you':'')+'.', skipped>0?'sys':'good');
+  gainReward(ROAD_SHRINES[i].rw, 'Shrine of '+v);
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  consumeActive(); renderAll();
+}
+
+/* --- Veiled Oracle (prophecy) --- */
+function canOracle(){
+  const c=activeCard();
+  if(SETTINGS.boards.H!=='oracle') return false;
+  if(!c || isFace(c) || activeSuit()!=='H') return false;
+  return !S.oracle.pending && S.oracle.slots.length<4;
+}
+function doOracle(guess){
+  if(!canOracle()) return;
+  const c=activeCard(); const v=activeValue();
+  S.oracle.pending={v, guess};
+  log('Oracle: you prophesy the next omen will be '+(guess==='hi'?'HIGHER':'LOWER')+' than '+v+'…', 'sys');
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  consumeActive(); renderAll();
+}
+function resolveProphecy(){
+  const p=S.oracle.pending;
+  if(!p || !S.row.length) return;
+  S.oracle.pending=null;
+  const r=S.row[0].card.rank;
+  const hit = p.guess==='hi' ? r>=p.v : r<=p.v;
+  const idx=S.oracle.slots.length;
+  S.oracle.slots.push({v:p.v, guess:p.guess, hit});
+  if(hit){
+    log('👁 The omen shows '+rlbl(r)+' — the prophecy of '+p.v+' ('+(p.guess==='hi'?'higher':'lower')+') is TRUE!', 'good');
+    gainReward(ORACLE_RW[idx], 'Prophecy '+(idx+1));
+  } else {
+    log('👁 The omen shows '+rlbl(r)+' — the prophecy is FALSE and struck from the record.', 'bad');
+  }
+}
+
+/* --- Gemcutter (pattern rows) --- */
+function canGem(key){
+  const c=activeCard();
+  if(SETTINGS.boards.D!=='gemcutter') return false;
+  if(!c || isFace(c) || activeSuit()!=='D') return false;
+  const vals=S.gems[key]; const v=activeValue();
+  if(vals.length>=3) return false;
+  if(key==='emerald') return vals.length===0 || v===vals[0];
+  if(key==='ruby') return vals.length===0 || v===vals[vals.length-1]+1;
+  if(key==='diamond'){
+    const sum=vals.reduce((a,b)=>a+b,0)+v;
+    if(vals.length===2) return sum===21;
+    if(vals.length===1) return sum<=20 && (21-sum)>=1 && (21-sum)<=13;
+    return v<=13;
+  }
+  return false;
+}
+function doGem(key){
+  if(!canGem(key)) return;
+  const c=activeCard(); const v=activeValue();
+  S.gems[key].push(v);
+  S.gold+=1;
+  log('Gemcutter: a '+v+' is set into the '+GEMS[key].em+' '+GEMS[key].name+' (+1 🪙 for the work).', 'good');
+  if(S.gems[key].length===3){
+    log('The '+GEMS[key].name+' setting is complete — flawless!', 'sys');
+    gainReward(GEMS[key].rw, GEMS[key].name);
+  }
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  consumeActive(); renderAll();
+}
+
+/* --- Trade Roads (network) --- */
+function routeTownsConnected(){ return S.routes.towns.filter(x=>x).length; }
+function canRoute(i){
+  const c=activeCard();
+  if(SETTINGS.boards.D!=='traderoute') return false;
+  if(!c || isFace(c) || activeSuit()!=='D') return false;
+  const e=ROUTE_EDGES[i];
+  if(S.routes.built[i]) return false;
+  if(activeValue()<e.req) return false;
+  if(!S.routes.built.some(x=>x)) return true;
+  return S.routes.towns[e.a] || S.routes.towns[e.b];
+}
+function doRoute(i){
+  if(!canRoute(i)) return;
+  const c=activeCard();
+  const e=ROUTE_EDGES[i];
+  S.routes.built[i]=true;
+  log('Trade Roads: you lay the road '+ROUTE_TOWNS[e.a].n+' — '+ROUTE_TOWNS[e.b].n+'.', 'good');
+  for(const t of [e.a, e.b]){
+    if(!S.routes.towns[t]){
+      S.routes.towns[t]=true;
+      gainReward(ROUTE_TOWNS[t].rw, ROUTE_TOWNS[t].n);
+      const n=routeTownsConnected();
+      if(ROUTE_STARS[n]) gainReward({fortune:ROUTE_STARS[n]}, n+' towns joined');
+    }
+  }
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  consumeActive(); renderAll();
+}
+
+/* ==================================================================
+   MODULE: ATTRIBUTES
+   ================================================================== */
+function canTrain(key){
+  if(!SETTINGS.attrs) return false;
+  const c=activeCard();
+  if(!c || isFace(c)) return false;
+  const a=ATTRS[key];
+  if(activeSuit()!==a.suit) return false;
+  const lvl=S.attrs[key];
+  if(lvl>=3) return false;
+  return activeValue()>=TRAIN_REQ[lvl];
+}
+function doTrain(key){
+  if(!canTrain(key)) return;
+  const c=activeCard();
+  const a=ATTRS[key];
+  S.attrs[key]++;
+  const lvl=S.attrs[key];
+  log('You train '+a.icon+' '+a.name+' to level '+lvl+': '+a.lv[lvl-1], 'sys');
+  // instant grants
+  if(key==='might' && lvl===3) gainReward({glory:2},'Might mastery');
+  if(key==='agility' && lvl===3) gainReward({lore:2},'Agility mastery');
+  if(key==='wisdom' && lvl===1) gainReward({mana:2},'Wisdom training');
+  if(key==='wisdom' && lvl===3) gainReward({spirit:2},'Wisdom mastery');
+  if(key==='spirit' && lvl===1) gainReward({gold:3},'Spirit training');
+  if(key==='spirit' && lvl===3) gainReward({fortune:2},'Spirit mastery');
+  if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
+  consumeActive(); renderAll();
+}
+
+/* ==================================================================
+   MODULE: FOLLOWERS
+   ================================================================== */
+function spendFollower(k){
+  if(!SETTINGS.followers || S.followers[k]<=0) return;
+  if(k==='squire'){
+    if(!S.active || isFace(activeCard())){ log('Squire: select a number card first.', 'bad'); return; }
+    S.followers[k]--;
+    if(S.active.forced!=null) S.active.forced=Math.min(13,S.active.forced+2);
+    else S.active.mod = Math.min(13-activeCard().rank, S.active.mod+2);
+    log('⚔ A Squire lends their strength: +2 (card is now '+activeValue()+').', 'sys');
+  }
+  if(k==='herbalist'){ S.followers[k]--; S.trailBreaks++; log('🌿 The Herbalist marks a hidden path — next trail space ignores the rising rule.', 'sys'); }
+  if(k==='acolyte'){ S.followers[k]--; S.parityBreaks++; log('🕯 The Acolyte prepares a rite — next altar offering ignores odd/even.', 'sys'); }
+  if(k==='trader'){ S.followers[k]--; S.gold+=2; log('🧺 The Trader turns a tidy profit: +2 🪙.', 'sys'); }
+  renderAll();
+}
+
+/* ==================================================================
+   MODULE: SPELLCRAFT
+   ================================================================== */
+function compVal(c){ return c.rank>=11 ? 10 : c.rank; }
+function beginSpell(id){
+  if(!SETTINGS.spells || !S.active) return;
+  const sp = SPELLS.find(s=>s.id===id);
+  if(!sp) return;
+  if(S.mana < sp.mana){ log('Not enough mana for '+sp.name+'.', 'bad'); return; }
+  if(id==='fireball' && (SETTINGS.boards.S!=='dungeon' || S.dungeonNext>=ROOMS.length)){ log('There is no dungeon room to burn.', 'bad'); return; }
+  S.spellMode = id;
+  S.spellFirst = {source:S.active.source, idx:S.active.idx};
+  S.active = null;
+  log('✨ Casting '+sp.icon+' '+sp.name+' — choose a second card to burn (row cards each use a pick).', 'sys');
+  renderAll();
+}
+function cancelSpell(){
+  S.spellMode=null; S.spellFirst=null;
+  log('The spell fizzles harmlessly (nothing spent).', 'lt');
+  renderAll();
+}
+function spellPickSecond(source, idx){
+  const sp = SPELLS.find(s=>s.id===S.spellMode);
+  const f = S.spellFirst;
+  if(source===f.source && idx===f.idx){ log('Choose a different card for the second component.', 'bad'); return; }
+  if(source==='row' && S.row[idx].taken) return;
+  // picks needed
+  const picksNeeded = (f.source==='row'?1:0) + (source==='row'?1:0);
+  if(picksNeeded > S.draftsLeft){ log('Not enough picks left to burn those row cards.', 'bad'); return; }
+  const c1 = f.source==='row' ? S.row[f.idx].card : S.hand[f.idx];
+  const c2 = source==='row' ? S.row[idx].card : S.hand[idx];
+  const sum = compVal(c1)+compVal(c2);
+  if(sum < sp.min){ log(sp.name+' needs combined value ≥ '+sp.min+' (you have '+sum+').', 'bad'); return; }
+  // pay & consume
+  S.mana -= sp.mana;
+  S.draftsLeft -= picksNeeded;
+  const consume = (src, i) => {
+    if(src==='row'){ S.row[i].taken=true; S.discard.push(S.row[i].card); }
+  };
+  consume(f.source, f.idx); consume(source, idx);
+  // hand removals: splice higher index first
+  const handIdxs = [];
+  if(f.source==='hand') handIdxs.push(f.idx);
+  if(source==='hand') handIdxs.push(idx);
+  handIdxs.sort((a,b)=>b-a).forEach(i=>{ S.pdiscard.push(S.hand[i]); S.hand.splice(i,1); });
+  log('✨ '+sp.icon+' '+sp.name+' consumes the '+rlbl(c1.rank)+SUITS[c1.suit].sym+' and '+rlbl(c2.rank)+SUITS[c2.suit].sym+' (combined '+sum+', −'+sp.mana+' 🔮).', 'sys');
+  // effects
+  if(sp.id==='fireball'){
+    const room=ROOMS[S.dungeonNext];
+    S.dungeonNext++;
+    log('🔥 The '+room.em+' '+room.name+' is obliterated!', 'good');
+    gainReward(room.rw, room.name);
+    if(SETTINGS.followers && FOLLOW_SPOTS.dungeon[S.dungeonNext-1]) recruit(FOLLOW_SPOTS.dungeon[S.dungeonNext-1]);
+  }
+  if(sp.id==='divination'){
+    for(const slot of S.row){ if(!slot.taken) S.discard.push(slot.card); }
+    S.row=[];
+    for(let i=0;i<4;i++){ const c=drawAdv(); if(c) S.row.push({card:c, taken:false}); }
+    log('👁 The Omen Row is swept clean — four fresh cards are revealed.', 'good');
+  }
+  if(sp.id==='transmute'){
+    const g=Math.floor(sum/2);
+    S.gold+=g;
+    log('⚗ Base matter becomes gold: +'+g+' 🪙.', 'good');
+  }
+  if(sp.id==='timewarp'){
+    S.draftsLeft++;
+    const c=drawHero();
+    if(c){ S.hand.push(c); log('⏳ Time bends — +1 pick, and the '+rlbl(c.rank)+SUITS[c.suit].sym+' slips into your hand.', 'good'); }
+    else log('⏳ Time bends — +1 pick this turn.', 'good');
+  }
+  S.spellMode=null; S.spellFirst=null;
+  renderAll();
+}
+
+/* ---------- class ability ---------- */
+function useAbility(){
+  if(!S || S.abilityUsed) return;
+  const k=S.cls;
+  if(k==='knight'){
+    if(!S.active || isFace(activeCard())){ log('Knight: select a number card first.', 'bad'); return; }
+    if(S.active.forced!=null) S.active.forced=Math.min(13,S.active.forced+3);
+    else S.active.mod = Math.min(13-activeCard().rank, S.active.mod+3);
+    log('Knight ability: +3 to the selected card (now '+activeValue()+').', 'sys');
+  }
+  if(k==='ranger'){ S.trailBreaks++; log('Ranger ability: your next trail space ignores the rising rule.', 'sys'); }
+  if(k==='druid'){ gainReward({heal:2, mana:1}, 'Druid ability'); }
+  if(k==='bard'){ S.threat=Math.max(0,S.threat-2); log('Bard ability: a soothing song calms the horde — −2 🔥 Threat.', 'sys'); }
+  if(k==='alchemist'){
+    const c=drawHero();
+    if(!c){ log('Alchemist: the hero deck is empty!', 'bad'); return; }
+    S.pdiscard.push(c);
+    if(isFace(c)){ S.gold+=1; log('Alchemist ability: the '+rlbl(c.rank)+SUITS[c.suit].sym+' fizzles… +1 🪙 of residue.', 'bad'); }
+    else { const m=Math.ceil(c.rank/2); S.mana+=m; log('Alchemist ability: the '+rlbl(c.rank)+SUITS[c.suit].sym+' distills into +'+m+' 🔮!', 'good'); }
+  }
+  if(k==='necromancer'){ S.wounds+=1; S.mana+=3; log('Necromancer ability: blood magic — +1 🩸 Wound, +3 🔮.', 'sys'); }
+  S.abilityUsed=true;
+  renderAll();
+}
+
+/* ==================================================================
+   RENDERING
+   ================================================================== */
+function cardHTML(c, cls, onclick){
+  const s=SUITS[c.suit];
+  const face = isFace(c) ? `<div class="face-tag">${c.rank===11?'Event: +3 gold':c.rank===12?'Event: mana / heal':'Event: XP, −1 threat'}</div>` : '';
+  const big = isFace(c) || c.rank===1
+    ? `<span class="fc">${FACE_EMOJI[c.rank]||''}</span>${s.sym}`
+    : s.sym;
+  return `<div class="pcard ${s.red?'red':''} ${cls||''}" onclick="${onclick}">
+    <div class="corner">${rlbl(c.rank)}<br>${s.sym}</div>
+    <div class="big">${big}</div>${face}
+    <div class="corner bot">${rlbl(c.rank)}<br>${s.sym}</div>
+  </div>`;
+}
+
+function renderTop(){
+  $('ui-round').textContent=S.round; $('ui-turn').textContent=S.turn;
+  $('ui-gold').textContent=S.gold; $('ui-mana').textContent=S.mana;
+  $('ui-xp').textContent=S.xp; $('ui-wounds').textContent=S.wounds;
+  $('ui-def').textContent=totalDefense();
+  $('ui-threat').textContent = threatBase(S.round)+S.threat + ' at dusk';
+  $('ui-stars').textContent = S.glory+S.lore+S.spirit+S.fortune;
+  const c=CLASSES[S.cls];
+  const btn=$('abilitybtn');
+  btn.textContent = c.icon+' '+c.name;
+  btn.disabled = S.abilityUsed;
+  btn.title = c.active;
+}
+
+function renderRow(){
+  $('omenrow').innerHTML = S.row.map((slot,i)=>{
+    const sel = S.active && S.active.source==='row' && S.active.idx===i;
+    const spellable = S.spellMode && !slot.taken && !(S.spellFirst.source==='row' && S.spellFirst.idx===i);
+    return cardHTML(slot.card, (slot.taken?'spent ':'')+(sel?'selected ':'')+(spellable?'spelltarget':''), `selectRow(${i})`);
+  }).join('');
+  $('draftnote').textContent = S.spellMode
+    ? '✨ Choose the second card for the spell…'
+    : (S.draftsLeft>0 ? 'Picks left this turn: '+S.draftsLeft : 'No picks left — play Hero Hand cards or end the turn.');
+}
+
+function renderHand(){
+  const ob=$('overdrawbtn');
+  ob.style.display = SETTINGS.pyl ? 'inline-block' : 'none';
+  ob.disabled = S.hand.length>=handLimit();
+  ob.title = 'Draw an extra hero card — but a face card escapes to the horde (+1 Threat).';
+  $('handhint').textContent = 'Your own deck. Playing a hand card is a free extra action. Draw 1 each turn (hand limit '+handLimit()+'); fresh hand of 3 each round.'+(SETTINGS.pyl&&S.wounds>=5?' BATTERED: limit reduced!':'');
+  $('handcards').innerHTML = S.hand.length
+    ? S.hand.map((c,i)=>{
+        const sel=S.active && S.active.source==='hand' && S.active.idx===i;
+        const spellable = S.spellMode && !(S.spellFirst.source==='hand' && S.spellFirst.idx===i);
+        return cardHTML(c, 'small '+(sel?'selected ':'')+(spellable?'spelltarget':''), `selectHand(${i})`);
+      }).join('')
+    : '<span class="note">Empty — you\'ll draw 1 at the start of next turn.</span>';
+}
+
+function renderActive(){
+  const b=$('active-body');
+  if(S.spellMode){
+    const sp=SPELLS.find(s=>s.id===S.spellMode);
+    b.innerHTML = `<p><b style="color:var(--mana)">${sp.icon} ${sp.name}</b> — ${sp.desc}</p>
+      <p class="note">Click a second card (dashed blue outline). Row cards each use a pick; hand cards are free. Face cards count as 10.</p>
+      <div class="modrow"><button class="tiny danger" onclick="cancelSpell()">Cancel Spell</button></div>`;
+    return;
+  }
+  const c=activeCard();
+  if(!c){ b.innerHTML='<span class="note">Click a card in the Omen Row or your Hero Hand.</span>'; return; }
+  const s=SUITS[activeSuit()];
+  if(isFace(c)){
+    let btns='';
+    if(c.rank===11) btns=`<button class="primary" onclick="playEvent()">🤹 Jack: gain 3 🪙${SETTINGS.followers?' + 🧺 Trader':''}</button>`;
+    if(c.rank===12) btns=`<button class="primary" onclick="playEvent('mana')">👸 Queen: +2 🔮</button>
+         <button class="primary" onclick="playEvent('heal')">👸 Queen: heal 2 🩸</button>`;
+    if(c.rank===13) btns=`<button class="primary" onclick="playEvent()">🤴 King: +1 XP, −1 🔥 Threat</button>`;
+    const spellBtns = SETTINGS.spells ? spellButtonsHTML() : '';
+    b.innerHTML = `<div class="modrow"><span class="valchip ${SUITS[c.suit].red?'red':''}">${rlbl(c.rank)}${SUITS[c.suit].sym}</span></div>
+      <p class="note">Face cards are events — resolve them, or leave them in the row and they raise the Threat.${S.cls==='bard'?' (Bard: events also grant +1 XP.)':''}</p>
+      <div class="modrow">${btns}</div>${spellBtns}`;
+    return;
+  }
+  const tc=tweakCost();
+  const followBtns = SETTINGS.followers && S.followers.squire>0
+    ? `<button class="tiny" onclick="spendFollower('squire')">⚔ Squire: +2 free (${S.followers.squire})</button>` : '';
+  b.innerHTML = `
+    <div class="modrow" style="align-items:center;">
+      <span class="valchip ${s.red?'red':''}">${activeValue()}${s.sym}</span>
+      <span class="note">→ ${SUITS[activeSuit()].name} go to <b>${boardDef(activeSuit()).name}</b>${S.unlocked.tower?' · Tower takes any suit':''}${S.unlocked.bog&&(activeSuit()==='S'||activeSuit()==='C')?' · Bog':''}${S.unlocked.tavern&&(activeSuit()==='H'||activeSuit()==='D')?' · Tavern':''}</span>
+    </div>
+    <div class="modrow">
+      <button class="tiny" onclick="modVal(-1)">−1 (${tc?tc+' 🪙':'free'})</button>
+      <button class="tiny" onclick="modVal(1)">+1 (${tc?tc+' 🪙':'free'})</button>
+      ${followBtns}
+    </div>
+    <div class="modrow">
+      <span class="note" style="align-self:center;">Suit:</span>
+      ${Object.keys(SUITS).map(k=>{
+        const cost=suitChangeCost(k);
+        return `<button class="tiny" ${activeSuit()===k?'disabled':''} onclick="modSuit('${k}')">${SUITS[k].sym} ${activeSuit()===k?'':(cost?cost+'🔮':'free')}</button>`;
+      }).join('')}
+    </div>
+    <div class="modrow">
+      <button class="tiny" onclick="campCard()">🏕 Camp (+${1+(S.cls==='alchemist'?1:0)+(attrL('spirit')>=2?1:0)} 🪙)</button>
+      <button class="tiny" onclick="S.active=null;renderAll();">Cancel</button>
+    </div>
+    ${SETTINGS.spells ? spellButtonsHTML() : ''}
+    <p class="note">Glowing spaces on the boards show every legal placement.</p>`;
+}
+function spellButtonsHTML(){
+  return `<div class="modrow" style="border-top:1px dashed #4a3a24; padding-top:8px;">
+    <span class="note" style="align-self:center;">✨ Cast (burns this + 1 more card):</span>
+    ${SPELLS.map(sp=>`<button class="tiny spell" ${S.mana<sp.mana?'disabled':''} title="${sp.desc}" onclick="beginSpell('${sp.id}')">${sp.icon} ${sp.name} (${sp.mana}🔮${sp.min?', Σ≥'+sp.min:''})</button>`).join('')}
+  </div>`;
+}
+
+function followerIcon(board, idx){
+  if(!SETTINGS.followers) return '';
+  const k = FOLLOW_SPOTS[board] && FOLLOW_SPOTS[board][idx];
+  return k ? `<span class="ficon" title="Recruits a ${FOLLOWERS[k].name}">${FOLLOWERS[k].icon}➕</span>` : '';
+}
+
+function renderDungeon(){
+  const el=$('dungeon-rooms');
+  let html=''; let lastD=0;
+  ROOMS.forEach((r,i)=>{
+    if(r.d!==lastD){ html+=`<div class="depth-label">⛏ Depth ${r.d}</div>`; lastD=r.d; }
+    const done=i<S.dungeonNext;
+    const legal = i===S.dungeonNext && canDungeon();
+    const reqTxt = r.t==='T' ? '≤ '+trapLimit(r) : '≥ '+fightNeed(r);
+    const reqCls = r.t==='T'?'trap':(r.t==='B'?'boss':'fight');
+    const kind = r.t==='T'?'Trap':(r.t==='B'?'Boss':'Fight');
+    html += `<div class="slot room ${done?'done':''} ${legal?'legal':''}" onclick="${legal?'doDungeon()':''}">
+      ${done?`<div class="mark">✗</div>`:''}
+      <div class="remoji">${r.em}</div>
+      <div class="rname">${r.name}</div>
+      <div class="rreq ${reqCls}">${kind} ${reqTxt}</div>
+      <div class="rw">${rwText(r.rw)} ${followerIcon('dungeon',i)}</div>
+    </div>`;
+  });
+  el.innerHTML=html;
+  $('glory-stars').innerHTML = starStr(S.glory);
+}
+function rwText(rw){
+  const p=[];
+  if(rw.gold)p.push(rw.gold+'🪙'); if(rw.mana)p.push(rw.mana+'🔮');
+  if(rw.xp)p.push(rw.xp+' XP'); if(rw.glory)p.push(rw.glory+'⭐');
+  if(rw.lore)p.push(rw.lore+'⭐'); if(rw.spirit)p.push(rw.spirit+'⭐');
+  if(rw.def)p.push('+'+rw.def+'🛡'); if(rw.heal)p.push('heal '+rw.heal);
+  if(rw.fortune)p.push(rw.fortune+'⭐');
+  return p.join(' · ');
+}
+
+function renderForest(){
+  const el=$('forest-trail');
+  el.innerHTML = FSLOTS.map((s,i)=>{
+    const done=i<S.trail.length;
+    const legal=i===S.trail.length && canForest();
+    return `<div class="slot fslot ${done?'done':''} ${legal?'legal':''}" onclick="${legal?'doForest()':''}">
+      <div class="femoji">${s.em}</div>
+      <div class="num">${done?`<span class="mark marker">${S.trail[i]}</span>`:''}</div>
+      <div class="rw">${rwText(s.rw)} ${followerIcon('forest',i)}</div>
+    </div>`;
+  }).join('');
+  const last = S.trail.length? S.trail[S.trail.length-1] : null;
+  $('forest-last').innerHTML = S.trail.length>=FSLOTS.length
+    ? 'The trail is complete!'
+    : (last!=null ? 'Next value must be <b>higher than '+last+'</b>'+(S.trailBreaks>0?' <span style="color:var(--marker2)">(rising rule suspended ×'+S.trailBreaks+')</span>':'') : 'Any club value may start the trail.');
+  $('lore-stars').innerHTML = starStr(S.lore);
+}
+
+function renderTemple(){
+  const el=$('temple-altars');
+  el.innerHTML = Object.entries(ALTARS).map(([k,a])=>{
+    const vals=S.altars[k];
+    const sum=vals.reduce((x,y)=>x+y,0);
+    const legal=canAltar(k);
+    return `<div class="altar">
+      <h3>${a.name}</h3>
+      <div class="boxes">
+        ${a.boxes.map((bx,i)=>{
+          const done=i<vals.length;
+          const slotLegal = legal && i===vals.length;
+          return `<div class="slot abox ${done?'done':''} ${slotLegal?'legal':''}" onclick="${slotLegal?`doAltar('${k}')`:''}">
+            <div class="num">${done?`<span class="mark marker">${vals[i]}</span>`:''}</div>
+            <div class="rw">${rwText(bx)} ${followerIcon('temple',i)}</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="cursum">Sum so far: <b class="marker">${sum}</b>${S.parityBreaks>0?' <span style="color:var(--marker2)">(parity waived ×'+S.parityBreaks+')</span>':''}</div>
+      <div class="sums">Complete: sum ≥ ${a.t3} → 3⭐ · ≥ ${a.t2} → 2⭐ · else 1⭐</div>
+    </div>`;
+  }).join('');
+  $('spirit-stars').innerHTML = starStr(S.spirit);
+}
+
+function renderMarket(){
+  const el=$('market-items');
+  el.innerHTML = ITEMS.map((it,i)=>{
+    const owned=!!S.items[it.name];
+    const legal=canBuy(i);
+    return `<div class="slot item ${owned?'owned':''} ${legal?'legal':''}" onclick="${legal?`doBuy(${i})`:''}">
+      <div class="iemoji">${it.em}</div>
+      <div class="iname">${it.name}</div>
+      <div class="iprice">price ${it.price} 🪙 · card ≥ ${it.price}</div>
+      <div class="idesc">${it.desc}</div>
+    </div>`;
+  }).join('');
+  const sz=$('sellzone');
+  sz.className='sellzone '+(canSell()?'legal':'');
+  $('sellval').textContent = canSell() ? 'Gain '+Math.ceil(activeValue()/2)+' 🪙'+(SETTINGS.followers&&activeValue()>=8?' + 🧺 Trader':'') : 'Select a diamond first';
+  $('fortune-stars').innerHTML = starStr(S.fortune);
+}
+
+function renderGuild(){
+  const el=$('charters');
+  el.innerHTML = Object.entries(LOCS).map(([k,L])=>{
+    if(S.unlocked[k]){
+      return `<div class="charter"><h3><svg class="emblem"><use href="#${L.svg}"/></svg> ${L.name}</h3>
+        <div class="cdesc">${L.blurb}</div>
+        <div class="unlocked-tag">✔ CHARTERED — see its board below</div></div>`;
+    }
+    const cost=unlockCost();
+    return `<div class="charter locked"><h3><svg class="emblem"><use href="#${L.svg}"/></svg> ${L.name}</h3>
+      <div class="cdesc">${L.blurb}</div>
+      <button class="tiny ${S.xp>=cost?'primary':''}" ${S.xp>=cost?'':'disabled'} onclick="unlockLoc('${k}')">Charter for ${cost} XP</button></div>`;
+  }).join('');
+}
+
+function renderAttrs(){
+  if(!SETTINGS.attrs) return;
+  $('attrs').innerHTML = Object.entries(ATTRS).map(([k,a])=>{
+    const lvl=S.attrs[k];
+    const trainable=canTrain(k);
+    return `<div class="attr">
+      <h3>${a.icon} ${a.name} <span style="margin-left:auto; font-size:.8rem;">${SUITS[a.suit].sym}</span></h3>
+      <div class="pips">${[0,1,2].map(i=>`<div class="pip ${i<lvl?'on':''}"></div>`).join('')}</div>
+      ${a.lv.map((t,i)=>`<div class="lvl ${i<lvl?'got':''}">${i<lvl?'✔':'L'+(i+1)+' (card ≥ '+TRAIN_REQ[i]+'):'} ${t}</div>`).join('')}
+      ${lvl<3?`<button class="tiny ${trainable?'primary':''}" ${trainable?'':'disabled'} onclick="doTrain('${k}')" style="margin-top:5px; width:100%;">Train to L${lvl+1} (needs ${SUITS[a.suit].sym} ≥ ${TRAIN_REQ[lvl]})</button>`:'<div class="lvl got" style="margin-top:5px;">★ Mastered</div>'}
+    </div>`;
+  }).join('');
+}
+
+function renderFollowers(){
+  if(!SETTINGS.followers) return;
+  $('followers').innerHTML = Object.entries(FOLLOWERS).map(([k,f])=>`
+    <div class="follower">
+      <div class="fh">${f.icon} ${f.name} <span class="fcount">${S.followers[k]}</span></div>
+      <div class="fdesc">${f.desc}</div>
+      <button class="tiny" ${S.followers[k]>0?'':'disabled'} onclick="spendFollower('${k}')">Spend</button>
+    </div>`).join('');
+}
+
+function renderTower(){
+  if(!S.unlocked.tower) return;
+  $('tower-floors').innerHTML = TOWER_FLOORS.map((f,i)=>{
+    const done=i<S.tower.length;
+    const legal=i===S.tower.length && canTower();
+    return `<div class="slot tfloor ${done?'done':''} ${legal?'legal':''}" onclick="${legal?'doTower()':''}">
+      <div class="num">${done?`<span class="mark marker">${S.tower[i]}</span>`:''}</div>
+      <div class="rw">Floor ${i+1} · ${rwText(f.rw)}</div>
+    </div>`;
+  }).join('');
+  const last = S.tower.length? S.tower[S.tower.length-1] : null;
+  $('tower-rule').innerHTML = S.tower.length>=TOWER_FLOORS.length
+    ? 'The Tower is complete!'
+    : (last!=null ? 'Next floor must be <b>lower than '+last+'</b> (any suit).' : 'Any value of any suit may lay the foundation.');
+}
+
+function renderBog(){
+  if(!S.unlocked.bog) return;
+  $('bog-pens').innerHTML = S.pens.map((pen,i)=>{
+    const legal=canPen(i);
+    const full=pen.length===2;
+    return `<div class="slot pen ${full?'done':''} ${legal?'legal':''}" onclick="${legal?`doPen(${i})`:''}">
+      <div class="pemoji">${BOG_EMOJI[i]}</div>
+      <div class="rname" style="font-size:.75rem;font-weight:bold;">Pen ${i+1}</div>
+      <div class="pairrow">
+        <div class="num ${pen.length>0?'filled':''}">${pen.length>0?`<span class="mark marker">${pen[0]}</span>`:''}</div>
+        <div class="num ${pen.length>1?'filled':''}">${pen.length>1?`<span class="mark marker">${pen[1]}</span>`:''}</div>
+      </div>
+      <div class="rw">${full?'Trapped!':'pair = +'+BOG_GLORY[i]+'⭐ & ½ value 🪙'}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderTavern(){
+  if(!S.unlocked.tavern) return;
+  $('tavern-run').innerHTML = TAVERN_BOXES.map((b,i)=>{
+    const done=i<S.run.length;
+    const legal=i===S.run.length && canTavern();
+    return `<div class="slot tbox ${done?'done':''} ${legal?'legal':''}" onclick="${legal?'doTavern()':''}">
+      <div class="num">${done?`<span class="mark marker">${S.run[i]}</span>`:''}</div>
+      <div class="rw">${rwText(b.rw)}</div>
+    </div>`;
+  }).join('');
+  $('tavern-rule').innerHTML = S.run.length
+    ? 'Run so far: <b class="marker">'+[...S.run].sort((a,b)=>a-b).join(' - ')+'</b> — next must be adjacent to one of these.'
+    : 'Any heart or diamond value may start the run.';
+}
+
+
+function renderCata(){
+  if(SETTINGS.boards.S!=='catacombs') return;
+  const legalT = canCata()? cataTarget() : -1;
+  $('cata-ring').innerHTML = '<div style="display:grid; grid-template-columns:repeat(5,1fr); gap:8px;">' +
+    CATA.map((ch,i)=>{
+      const here = S.cata.pos===i;
+      const done = S.cata.visited[i];
+      const legal = i===legalT;
+      return `<div class="slot room ${done?'done':''} ${legal?'legal':''}" onclick="${legal?'doCata()':''}" style="min-height:78px;">
+        ${here?'<div style="position:absolute;top:2px;right:4px;">🧍</div>':''}
+        ${done?'<div class="mark">✗</div>':''}
+        <div class="remoji">${ch.em}</div>
+        <div class="rname">Crypt ${i+1}</div>
+        <div class="rw">${rwText(ch.rw)}</div>
+      </div>`;
+    }).join('') + '</div>';
+  $('cata-rule').innerHTML = S.cata.visited.every(x=>x)
+    ? 'Every crypt stands open — the Nameless is pleased.'
+    : (S.cata.pos<0 ? 'You stand at the entrance (before Crypt 1). A value of v lands on Crypt v.' :
+       'You stand at Crypt '+(S.cata.pos+1)+'. Move exactly your card\u2019s value clockwise; the ring wraps. Opening all 10: '+rwText(CATA_BONUS)+'.');
+  $('cata-glory').innerHTML = starStr(S.glory);
+}
+
+function renderWar(){
+  if(SETTINGS.boards.S!=='warcamp') return;
+  $('war-lines').innerHTML = S.lines.map((L,i)=>{
+    const sum=lineSum(i);
+    const legal=canLine(i);
+    const chargeable=canCharge(i);
+    const stTxt = L.st==='charged' ? '⚔ CHARGED!' : L.st==='routed' ? '💥 ROUTED' : (sum>=WAR_LOW?'in the band!':'mustering…');
+    return `<div class="slot ${legal?'legal':''} ${L.st!=='open'?'done':''}" style="padding:10px; margin-bottom:8px;" onclick="${legal?`doLine(${i})`:''}">
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <b>Line ${i+1}</b>
+        <span>${L.vals.map(v=>`<span class="mark marker" style="position:static; font-size:1.1rem; margin-right:6px;">${v}</span>`).join('')||'<span class="note">empty</span>'}</span>
+        <span class="note">sum <b class="marker">${sum}</b> / band ${WAR_LOW}–${WAR_HIGH} · ${stTxt}</span>
+        ${chargeable?`<button class="tiny primary" onclick="event.stopPropagation();chargeLine(${i})">⚔ Sound the Charge (${lineSum(i)>=WAR_STRONG?'2⭐':'1⭐'} +1🛡)</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  $('war-glory').innerHTML = starStr(S.glory);
+}
+
+function renderThicket(){
+  if(SETTINGS.boards.C!=='thicket') return;
+  const legalCells = S.fill? thicketLegalCells() : [];
+  $('thicket-grid').innerHTML = '<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px; max-width:320px; margin:0 auto;">' +
+    S.grid.map((filled,i)=>{
+      const legal=legalCells.includes(i);
+      return `<div class="slot ${filled?'done':''} ${legal?'legal':''}" style="min-height:56px; display:flex; flex-direction:column; align-items:center; justify-content:center;" onclick="${legal?`fillThicketCell(${i})`:''}">
+        ${filled?'<span class="mark" style="position:static; font-size:1.2rem;">🌿</span>':''}
+        <div class="rw">${THICKET_RW[i]?rwText(THICKET_RW[i]):''}</div>
+      </div>`;
+    }).join('') + '</div>';
+  if(!S.fill && canThicket()){
+    // clicking anywhere on the grid begins the clearing
+    $('thicket-grid').firstChild && ($('thicket-grid').firstChild.onclick = doThicketStart);
+    $('thicket-grid').firstChild && $('thicket-grid').firstChild.classList.add('legal');
+    $('thicket-grid').firstChild && ($('thicket-grid').firstChild.style.cursor='pointer');
+  }
+  $('thicket-rule').innerHTML = S.fill
+    ? '<b>Clear '+S.fill.left+' more cell'+(S.fill.left>1?'s':'')+'</b> — each must touch a cell cleared this action.'
+    : (canThicket()? 'This club clears <b>'+Math.min(fillCount(activeValue()), S.grid.filter(x=>!x).length)+'</b> cells — click the board to begin.'
+                   : 'A club of 1–4 clears 1 cell · 5–9 clears 2 · 10–13 clears 3. Rows pay 1⭐; the full grid pays 1⭐ more.');
+  $('thicket-lore').innerHTML = starStr(S.lore);
+}
+function canThicketClick(){ return canThicket(); }
+
+function renderStones(){
+  if(SETTINGS.boards.C!=='stones') return;
+  const k=stonesCol();
+  $('stones-cols').innerHTML = '<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px;">' +
+    S.stones.map((col,i)=>{
+      const legal = i===k && canStones();
+      const done = col.length===2;
+      return `<div class="slot ${done?'done':''} ${legal?'legal':''}" style="padding:8px; text-align:center;" onclick="${legal?'doStones()':''}">
+        <div class="rname" style="font-weight:bold; font-size:.78rem;">Pair ${i+1}</div>
+        <div style="display:flex; gap:6px; justify-content:center; margin:6px 0;">
+          <div class="num" style="width:30px;height:30px;border:2px ${col.length>0?'solid var(--marker2)':'dashed var(--ink-soft)'};border-radius:6px;display:flex;align-items:center;justify-content:center;">${col[0]!=null?`<span class="mark marker" style="position:static;font-size:1rem;">${col[0]}</span>`:''}</div>
+          <div class="num" style="width:30px;height:30px;border:2px ${col.length>1?'solid var(--marker2)':'dashed var(--ink-soft)'};border-radius:6px;display:flex;align-items:center;justify-content:center;">${col[1]!=null?`<span class="mark marker" style="position:static;font-size:1rem;">${col[1]}</span>`:''}</div>
+        </div>
+        <div class="rw">${done?('sum '+(col[0]+col[1])):rwText(STONE_RW[i])}</div>
+      </div>`;
+    }).join('') + '</div>';
+  $('stones-rule').innerHTML = stonesCol()<0 ? 'All four pairs stand — the circle sings.'
+    : 'Pair '+(stonesCol()+1)+' must complete with a sum <b>greater than '+prevStoneSum()+'</b>.';
+  $('stones-lore').innerHTML = starStr(S.lore);
+}
+
+function renderRoad(){
+  if(SETTINGS.boards.H!=='road') return;
+  const v = S.active && !isFace(activeCard()||{rank:11}) ? activeValue() : null;
+  $('road-shrines').innerHTML = '<div style="display:grid; grid-template-columns:repeat(8,1fr); gap:6px;">' +
+    ROAD_SHRINES.map((s,i)=>{
+      const visited = i===S.roadPos || (i<S.roadPos && false);
+      const lost = i<S.roadPos && i!==S.roadPos;
+      const here = i===S.roadPos;
+      const legal = canRoad() && i===ROAD_SHRINES.findIndex((x,j)=> j>S.roadPos && x.v===activeValue());
+      return `<div class="slot fslot ${here?'done':''} ${legal?'legal':''}" style="${lost&&!here?'opacity:.35;':''}" onclick="${legal?'doRoad()':''}">
+        <div class="femoji">${s.em}</div>
+        <div class="num" style="width:32px;height:32px;">${here?'<span class="mark marker" style="position:static;">🚶</span>':`<b>${s.v}</b>`}</div>
+        <div class="rw">${rwText(s.rw)}</div>
+      </div>`;
+    }).join('') + '</div>';
+  $('road-rule').innerHTML = S.roadPos>=ROAD_SHRINES.length-1 ? 'The pilgrimage is complete.'
+    : 'Play a heart matching a shrine value ahead of you — everything you pass is lost.';
+  $('road-spirit').innerHTML = starStr(S.spirit);
+}
+
+function renderOracle(){
+  if(SETTINGS.boards.H!=='oracle') return;
+  $('oracle-slots').innerHTML = '<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px;">' +
+    ORACLE_RW.map((rw,i)=>{
+      const s=S.oracle.slots[i];
+      const pendingHere = !s && i===S.oracle.slots.length && S.oracle.pending;
+      return `<div class="slot ${s?(s.hit?'done':''):''}" style="padding:8px; text-align:center; ${s&&!s.hit?'opacity:.4;':''}">
+        <div class="rname" style="font-weight:bold; font-size:.78rem;">Prophecy ${i+1}</div>
+        <div style="min-height:34px; display:flex; align-items:center; justify-content:center;">
+          ${s? `<span class="mark marker" style="position:static; font-size:1rem;">${s.hit?'✓':'✗'} ${s.v}${s.guess==='hi'?'▲':'▼'}</span>`
+             : (pendingHere? `<span class="note">awaiting: ${S.oracle.pending.v}${S.oracle.pending.guess==='hi'?'▲':'▼'}</span>` : '')}
+        </div>
+        <div class="rw">${rwText(rw)}</div>
+      </div>`;
+    }).join('') + '</div>';
+  $('oracle-rule').innerHTML = S.oracle.pending
+    ? 'A prophecy hangs in the air — it resolves against the first card of next turn\u2019s Omen Row.'
+    : (canOracle() ? 'Choose: will the next omen be <button class="tiny primary" onclick="doOracle(\'hi\')">▲ Higher</button> or <button class="tiny primary" onclick="doOracle(\'lo\')">▼ Lower</button> than your '+activeValue()+'? (Ties fulfil the prophecy.)'
+                   : 'Offer a heart, then declare higher or lower. A=1 … K=13.');
+  $('oracle-spirit').innerHTML = starStr(S.spirit);
+}
+
+function renderGems(){
+  if(SETTINGS.boards.D!=='gemcutter') return;
+  $('gem-rows').innerHTML = Object.entries(GEMS).map(([k,g])=>{
+    const vals=S.gems[k];
+    const legal=canGem(k);
+    const done=vals.length===3;
+    return `<div class="slot ${done?'done':''} ${legal?'legal':''}" style="padding:8px 10px; margin-bottom:8px;" onclick="${legal?`doGem('${k}')`:''}">
+      <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        <b>${g.em} ${g.name}</b>
+        <span>${[0,1,2].map(i=>`<span class="num" style="display:inline-flex; width:28px;height:28px;border:2px ${vals[i]!=null?'solid var(--marker2)':'dashed var(--ink-soft)'};border-radius:6px;align-items:center;justify-content:center;margin-right:4px;">${vals[i]!=null?`<span class="mark marker" style="position:static;font-size:.95rem;">${vals[i]}</span>`:''}</span>`).join('')}</span>
+        <span class="note">${g.hint} · ${rwText(g.rw)}</span>
+      </div>
+    </div>`;
+  }).join('');
+  $('gem-fortune').innerHTML = starStr(S.fortune);
+}
+
+function renderRoute(){
+  if(SETTINGS.boards.D!=='traderoute') return;
+  const W=300, H=150;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%; max-width:520px; display:block; margin:0 auto;">`;
+  ROUTE_EDGES.forEach((e,i)=>{
+    const A=ROUTE_TOWNS[e.a], B=ROUTE_TOWNS[e.b];
+    const built=S.routes.built[i];
+    const legal=canRoute(i);
+    const mx=(A.x+B.x)/2, my=(A.y+B.y)/2;
+    svg += `<line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}"
+      stroke="${built?'var(--marker2)':(legal?'var(--marker)':'var(--ink-soft)')}"
+      stroke-width="${built?5:(legal?6:3)}" ${built?'':'stroke-dasharray="6 5"'}
+      ${legal?`style="cursor:pointer;" onclick="doRoute(${i})"`:''} stroke-linecap="round"/>`;
+    svg += `<g ${legal?`style="cursor:pointer;" onclick="doRoute(${i})"`:''}>
+      <circle cx="${mx}" cy="${my}" r="9" fill="${built?'var(--marker2)':'var(--parch)'}" stroke="${legal?'var(--marker)':'var(--ink-soft)'}" stroke-width="${legal?3:1.5}"/>
+      <text x="${mx}" y="${my+3.5}" text-anchor="middle" font-size="10" font-weight="bold" fill="${built?'#fff':'var(--ink)'}">${built?'✓':e.req}</text></g>`;
+  });
+  ROUTE_TOWNS.forEach((t,i)=>{
+    const on=S.routes.towns[i];
+    svg += `<circle cx="${t.x}" cy="${t.y}" r="12" fill="${on?'var(--gold)':'var(--parch)'}" stroke="var(--ink)" stroke-width="2"/>
+      <text x="${t.x}" y="${t.y-16}" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--ink)">${t.n}</text>
+      <text x="${t.x}" y="${t.y+26}" text-anchor="middle" font-size="8.5" fill="var(--ink-soft)">${rwText(t.rw)}</text>`;
+  });
+  svg += '</svg>';
+  $('route-map').innerHTML = svg;
+  const n=routeTownsConnected();
+  $('route-rule').innerHTML = 'Towns joined: <b class="marker">'+n+'</b> · milestones: 3rd/4th/5th town +1⭐ each, 6th +2⭐. Road numbers show the minimum diamond value.';
+  $('route-fortune').innerHTML = starStr(S.fortune);
+}
+
+function renderLog(){
+  $('logwrap').innerHTML = S.log.slice(0,80).map(l=>`<div class="${l.cls}">${l.msg}</div>`).join('');
+}
+
+function renderAll(){
+  renderTop(); renderRow(); renderHand(); renderActive();
+  renderDungeon(); renderForest(); renderTemple(); renderMarket();
+  renderGuild(); renderAttrs(); renderFollowers();
+  renderTower(); renderBog(); renderTavern();
+  renderCata(); renderWar(); renderThicket(); renderStones();
+  renderRoad(); renderOracle(); renderGems(); renderRoute();
+  renderLog();
+  saveGame();
+}
+
+/* boot */
+renderSetup();
+
+</script>
+</body>
+</html>

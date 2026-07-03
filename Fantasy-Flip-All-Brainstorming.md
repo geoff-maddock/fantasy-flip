@@ -327,3 +327,6 @@ Sections of an adventure board
 	- Buying items that can be used up
 	- Accessing the wizard's tower
 	- Improving some character types? 
+
+
+	

@@ -4,7 +4,9 @@ v.0.1 - ALPHA
 This is all the notes and brainstorming for the game including ideas that have been tested or abandoned and why.
 
 ## STORY
-A flip and write game that uses a deck (or decks) of cards for the randomization mechanism.  Players build a party/adventurer and explore a dungeon for gold, experience and renown.
+A flip and write game that uses decks of cards (2) for the randomization mechanism.  
+Players build an adventurer character and explore a fantasy world locations to gather resources, solve puzzles, battle monsters and 
+complete quests for gold, experience and renown.
  
 ## OBJECTIVE
 Each player is an adventurer seeking their fame and fortune in a fantasy land of danger and magic.  Flip cards to improve your skills or adventure in different lands, gaining adventure, fortune, spirit and renown.
@@ -13,13 +15,14 @@ Each player is an adventurer seeking their fame and fortune in a fantasy land of
 - 1-n players
 - 30 mins?
 - setup involves each player taking a board and a dry erase pen, shuffling their own standard deck of playing cards, and then one deck is used for the "dungeon"
-- play takes place over 3 rounds consisting of 5 turns each
-- on a turn, four cards are revealed from the adventuredeck, and all players must pick from those cards to perform actions
-- they can use their own deck to modify their actions
+- play takes place over 4 rounds consisting of 4 turns each
+- on a turn, players draw and play cards from their deck based on their available stats
+- cards can be drawn from the adventure deck, which define available actions to all players on the adventure boards
+- at the end of each round, players can gain levels that will allow them to draw and play more cards on their turn, and gain access to new areas and actions on the adventure boards
 
 ## GAME TERMS
-Game - one full game that consists of three rounds with five turns each
-Round - each round consists of five turns
+Game - one full game that consists of four rounds with four turns each
+Round - each round consists of four turns
 Turn - each turn is one action per player, and one reveal of cards
 Action - any legal action a player may take by using symbols on the revealed cards to take an available legal action on a board
 Health - visible as hearts on the players board, if they run out they go to purgatory and must pay a penalty to return
@@ -148,8 +151,23 @@ Each has a different mini game or games that players can engage with to gain res
 		- Shrines: flip cards and add your spirit to gain favor with the gods, but if you flip a diamond you lose mana
 
 ### Dungeon
+	- Requires a spade card to enter.
+	- Three mechanisms:
+		- Traps: flip cards and add your agility to avoid traps, but if you flip a heart you lose health
+		- Monsters: flip cards and add your might to defeat monsters, but if you flip a heart you lose health
+		- Puzzles: flip cards and add your mind to solve puzzles, but if you flip a club you lose gold
 ### Tower
+	- Requires a diamond card to enter.
+	- Three mechanisms:
+		- Research: flip cards and add your mind to gain knowledge, but if you flip a spade you lose health
+		- Magic: flip cards and add your spirit to cast spells, but if you flip a diamond you lose mana
+		- Diplomacy: flip cards and add your charisma to influence others, but if you flip a club you lose gold
 ### Swamp
+	- Requires a heart card to enter.
+	- Three mechanisms:
+		- Foraging: flip cards and add your agility to gather resources, but if you flip a spade you lose health
+		- Monsters: flip cards and add your might to defeat monsters, but if you flip a heart you lose health
+		- Curses: flip cards and add your spirit to lift curses, but if you flip a diamond you lose mana
 ### Cave
 ### Temple
 ### City
@@ -163,6 +181,7 @@ Each has a different mini game or games that players can engage with to gain res
 		- MARKET 5, 6, 7
 		- HIGH STREET 8, 9, 10
 		- ROYAL J, Q, K, 
+			- each has a quest that you can accept and if you complete it you gain a lot of points and a special ability
 		- GRAVEYARD / SKID ROW A
 		- Market
 		- Blacksmith
@@ -173,7 +192,7 @@ Each has a different mini game or games that players can engage with to gain res
 		- Temple
 		- Stables
 		- Candlemaker
-		- Tavern
+			- Tick off candles that grant you bonus actions to dungeons and caves
 		- Guild
 			- IMPROVE A CLASS ABILITY
 		- Blacksmith
@@ -231,19 +250,20 @@ Each has a different mini game or games that players can engage with to gain res
 ##### Artifacts / Relics
 - Royals may quest you to gather sets of these relics.  They provide color energy and when collected grant you gold and scoring.
 
+- Collect any one grants the ability, collect a set you can gain stats or score points
 Golden 
 	Idol
 	Fleece
 	Helm
 Ancient
-  Tablet
-  Obelisk
-  Shroud
+  	Tablet
+  	Obelisk
+  	Shroud
 Jade
 	Sceptre
 	Figure
-  Crown
+  	Crown
 Enchanted
-  Dagger
-  Talisman
-  Gauntlet
+  	Dagger
+  	Talisman
+  	Gauntlet

@@ -30,7 +30,7 @@
 
 - Discovery / Adventure / Exploration
 - Champion / Glory
-- Arcana / Mystery / Intrigue / Secrets / Mystic / Lore
+- Lore / Mystery / Intrigue / Secrets / Mystic / Arcana 
 - Fortune / Wealth / Social / Influence / Renown / Prosperity
 * Note: I would like the attribute and the scoring to start with different letters 
 
