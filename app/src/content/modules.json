@@ -1,0 +1,26 @@
+{
+  "attrs": {
+    "might": { "suit": "S", "icon": "💪", "name": "Might", "lv": ["+1 Defense", "Fight & boss thresholds −1", "+2⭐ Glory (instant)"] },
+    "agility": { "suit": "C", "icon": "🤸", "name": "Agility", "lv": ["Trap limits +1", "One free ±1 tweak each turn", "+2⭐ Lore (instant)"] },
+    "wisdom": { "suit": "H", "icon": "🧠", "name": "Wisdom", "lv": ["+2 🔮 (instant)", "Suit changes cost 1 🔮", "+2⭐ Spirit (instant)"] },
+    "spirit": { "suit": "D", "icon": "🕯️", "name": "Spirit", "lv": ["+3 🪙 (instant)", "Camping yields +1 🪙", "+2⭐ Fortune (instant)"] }
+  },
+  "trainReq": [4, 7, 10],
+  "followers": {
+    "squire": { "icon": "⚔️", "name": "Squire", "desc": "Spend: +2 to the selected card, free." },
+    "herbalist": { "icon": "🌿", "name": "Herbalist", "desc": "Spend: your next trail space ignores the rising rule." },
+    "acolyte": { "icon": "🕯️", "name": "Acolyte", "desc": "Spend: your next altar offering ignores odd/even." },
+    "trader": { "icon": "🧺", "name": "Trader", "desc": "Spend: gain 2 🪙." }
+  },
+  "spells": [
+    { "id": "fireball", "icon": "🔥", "name": "Fireball", "mana": 2, "min": 12, "desc": "Combined ≥ 12: obliterate the current dungeon room and gain its rewards." },
+    { "id": "divination", "icon": "👁️", "name": "Divination", "mana": 1, "min": 0, "desc": "Sweep the Omen Row and reveal 4 fresh cards (no Threat from the swept ones)." },
+    { "id": "transmute", "icon": "⚗️", "name": "Transmute", "mana": 1, "min": 0, "desc": "Gain gold equal to half the combined value (rounded down)." },
+    { "id": "timewarp", "icon": "⏳", "name": "Time Warp", "mana": 3, "min": 10, "desc": "Combined ≥ 10: gain +1 pick this turn and draw 1 hero card." }
+  ],
+  "chess": {
+    "glyph": { "R": "♜", "B": "♝", "N": "♞", "P": "♟", "K": "♚" },
+    "name": { "R": "Rook", "B": "Bishop", "N": "Knight", "P": "Pawn", "K": "Shadow King" },
+    "victimRunes": { "B": "tide", "N": "stone", "K": "ember" }
+  }
+}

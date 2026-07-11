@@ -1,0 +1,8 @@
+{
+  "knight": { "icon": "🛡️", "name": "Knight", "passive": "+1 Defense.", "active": "Once per round: +3 to the selected card, free." },
+  "ranger": { "icon": "🏹", "name": "Ranger", "passive": "First ±1 tweak on a club is free.", "active": "Once per round: your next trail space ignores the rising rule." },
+  "druid": { "icon": "🌿", "name": "Druid", "passive": "Swapping a card between ♣ and ♥ is free.", "active": "Once per round: heal 2 and gain 1 mana." },
+  "bard": { "icon": "🎻", "name": "Bard", "passive": "Face-card events also grant +1 XP.", "active": "Once per round: a soothing song — reduce Threat by 2." },
+  "alchemist": { "icon": "⚗️", "name": "Alchemist", "passive": "Camping a card yields 2 gold.", "active": "Once per round: flip your hero deck’s top card — number: gain half its value in mana (rounded up); face: fizzle, gain 1 gold." },
+  "necromancer": { "icon": "💀", "name": "Necromancer", "passive": "Wounds cost you only 1 point instead of 2.", "active": "Once per round: blood magic — take 1 wound, gain 3 mana." }
+}

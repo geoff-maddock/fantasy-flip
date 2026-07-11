@@ -1,0 +1,26 @@
+{
+  "id": "temple",
+  "svg": "fd-temple",
+  "name": "The Twin Temple",
+  "suit": "H",
+  "track": "spirit",
+  "mech": "Parity altars — odd on Sun, even on Moon, no repeats; big sums score big.",
+  "altars": {
+    "sun": {
+      "name": "☀ Sun Altar (odd)",
+      "parity": 1,
+      "boxes": [{ "mana": 1 }, { "heal": 1 }, { "xp": 1 }, { "def": 1 }],
+      "t3": 20,
+      "t2": 14
+    },
+    "moon": {
+      "name": "☾ Moon Altar (even)",
+      "parity": 0,
+      "boxes": [{ "gold": 1 }, { "mana": 1 }, { "heal": 1 }, { "def": 1 }],
+      "t3": 24,
+      "t2": 16
+    }
+  },
+  "runeSpots": { "sun": { "2": "ember" }, "moon": { "2": "tide" } },
+  "followSpots": { "1": "acolyte" }
+}

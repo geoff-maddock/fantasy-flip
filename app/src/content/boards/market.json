@@ -1,0 +1,17 @@
+{
+  "id": "market",
+  "svg": "fd-market",
+  "name": "The Market",
+  "suit": "D",
+  "track": "fortune",
+  "mech": "Shopping — sell for gold or buy items with value + gold.",
+  "items": [
+    { "name": "Torch", "em": "🔥", "price": 2, "desc": "Trap limits are +1 more forgiving" },
+    { "name": "Boots", "em": "🥾", "price": 2, "desc": "First ±1 tweak each turn is free" },
+    { "name": "Shield", "em": "🛡️", "price": 3, "desc": "+1 Defense" },
+    { "name": "Amulet", "em": "📿", "price": 3, "desc": "Suit change costs 1 mana" },
+    { "name": "Sword", "em": "⚔️", "price": 4, "desc": "Fight & boss thresholds −1" },
+    { "name": "Crown", "em": "👑", "price": 6, "desc": "+2 XP now · worth 2 Fortune ⭐" }
+  ],
+  "itemRuneMap": { "Torch": "ember", "Amulet": "tide", "Crown": "gale" }
+}

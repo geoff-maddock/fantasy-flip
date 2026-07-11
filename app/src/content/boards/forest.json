@@ -1,0 +1,20 @@
+{
+  "id": "forest",
+  "svg": "fd-forest",
+  "name": "The Wildwood",
+  "suit": "C",
+  "track": "lore",
+  "mech": "Rising trail — every value strictly higher than the last.",
+  "slots": [
+    { "em": "🌱", "rw": { "gold": 1 } },
+    { "em": "🍄", "rw": { "mana": 1 } },
+    { "em": "🌿", "rw": { "lore": 1 } },
+    { "em": "🦌", "rw": { "xp": 1 } },
+    { "em": "🌲", "rw": { "lore": 1 } },
+    { "em": "🪵", "rw": { "gold": 2 } },
+    { "em": "🦉", "rw": { "lore": 1 } },
+    { "em": "🏞️", "rw": { "lore": 2, "heal": 2 } }
+  ],
+  "runeSpots": { "2": "gale", "4": "tide", "6": "stone" },
+  "followSpots": { "1": "herbalist", "5": "herbalist" }
+}

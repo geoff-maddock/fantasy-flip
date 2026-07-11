@@ -1,0 +1,77 @@
+{
+  "meta": {
+    "games": 120,
+    "strategies": [
+      "random",
+      "greedy",
+      "specialist",
+      "defensive",
+      "gambler"
+    ]
+  },
+  "strategies": {
+    "random": {
+      "min": 14,
+      "med": 38,
+      "avg": 37.1,
+      "max": 69
+    },
+    "greedy": {
+      "min": 19,
+      "med": 36,
+      "avg": 35.3,
+      "max": 52
+    },
+    "specialist": {
+      "min": 22,
+      "med": 45,
+      "avg": 46.5,
+      "max": 84
+    },
+    "defensive": {
+      "min": 19,
+      "med": 38,
+      "avg": 39.6,
+      "max": 66
+    },
+    "gambler": {
+      "min": 28,
+      "med": 56,
+      "avg": 58,
+      "max": 90
+    }
+  },
+  "areaYields": {
+    "dungeon": 4.29,
+    "train": 11.87,
+    "face": 0,
+    "oracle": 0,
+    "chess": 4.64,
+    "turn/assault": 8.02,
+    "market": 12.39,
+    "thicket": 0,
+    "bog": 4.28,
+    "catacombs": 6.08,
+    "temple": 8.92,
+    "gemcutter": 1.27,
+    "stones": 2.52,
+    "camp": 0,
+    "tower": 3.38,
+    "traderoute": 8.55,
+    "warcamp": 4.8,
+    "forest": 2.58,
+    "road": 4.96,
+    "tavern": 0.12
+  },
+  "notes": [
+    "Strategy spread: Gambler 58 > Specialist 46.5 > Defensive 39.6 > Random 37.1 > Greedy 35.3.",
+    "⚠ Gambler is the top strategy — push-your-luck EV is too generous.",
+    "Star output per game by area (skilled bots): market 2.48, temple 1.83, traderoute 1.71, catacombs 1.26, road 1.05, warcamp 1.03, dungeon 1, bog 0.95, tower 0.7, forest 0.57, stones 0.54, chess 0.38, gemcutter 0.3, tavern 0.03, thicket 0, oracle 0.",
+    "Delve: 21% bust rate, avg banked 0.8 🪙 per delve.",
+    "Oracle hit rate 70%.",
+    "Assaults repelled 13% of the time, avg 2.83 wounds per failed defense.",
+    "War Camp: 329 charges vs 4 routs.",
+    "Runecraft: 7.2 runes and 0.82 Confluences per game.",
+    "Average leftover gold at game end: 35.8 🪙."
+  ]
+}

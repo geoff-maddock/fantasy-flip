@@ -1,0 +1,6 @@
+{
+  "ember": { "icon": "☄️", "name": "Ember", "power": "Searing Sigil: +4 to the selected number card, free." },
+  "tide": { "icon": "💧", "name": "Tide", "power": "Tidecall: sweep the Omen Row and reveal 4 fresh cards." },
+  "gale": { "icon": "🌪️", "name": "Gale", "power": "Galestep: +1 pick this turn and draw 1 hero card." },
+  "stone": { "icon": "🪨", "name": "Stone", "power": "Stoneward: +1 🛡 permanently and heal 2." }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "dungeon",
+  "svg": "fd-dungeon",
+  "name": "The Dungeon",
+  "suit": "S",
+  "track": "glory",
+  "mech": "Gated gauntlet — high cards fight, low cards slip traps. Bosses grant Defense; delve for loot.",
+  "rooms": [
+    { "t": "F", "thr": 2, "d": 1, "name": "Rats in the Dark", "em": "🐀", "rw": { "gold": 1 } },
+    { "t": "T", "thr": 5, "d": 1, "name": "Dart Trap", "em": "🎯", "rw": { "mana": 1 } },
+    { "t": "F", "thr": 5, "d": 1, "name": "Goblin Pack", "em": "👺", "rw": { "gold": 2 } },
+    { "t": "B", "thr": 7, "d": 1, "name": "Ogre Gatekeeper", "em": "👹", "rw": { "glory": 1, "def": 1 } },
+    { "t": "F", "thr": 6, "d": 2, "name": "Skeleton Guard", "em": "💀", "rw": { "gold": 2 } },
+    { "t": "T", "thr": 4, "d": 2, "name": "Pit of Spikes", "em": "🕳️", "rw": { "xp": 1 } },
+    { "t": "F", "thr": 8, "d": 2, "name": "Hungry Wraith", "em": "👻", "rw": { "glory": 1 } },
+    { "t": "B", "thr": 10, "d": 2, "name": "Troll Warden", "em": "🧌", "rw": { "glory": 1, "def": 1 } },
+    { "t": "F", "thr": 8, "d": 3, "name": "Fire Drake", "em": "🐉", "rw": { "mana": 2 } },
+    { "t": "T", "thr": 3, "d": 3, "name": "Cursed Glyphs", "em": "🪬", "rw": { "xp": 2 } },
+    { "t": "F", "thr": 10, "d": 3, "name": "Lich Knight", "em": "☠️", "rw": { "glory": 2 } },
+    { "t": "B", "thr": 12, "d": 3, "name": "The Thing Below", "em": "🐙", "rw": { "glory": 2, "def": 1 } }
+  ],
+  "runeSpots": { "1": "tide", "4": "stone", "8": "ember", "10": "gale" },
+  "followSpots": { "2": "squire", "6": "squire" }
+}

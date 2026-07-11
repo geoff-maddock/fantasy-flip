@@ -1,0 +1,103 @@
+{
+  "catacombs": {
+    "id": "catacombs", "svg": "fd-catacombs", "suit": "S", "track": "glory",
+    "name": "Catacombs of the Nameless",
+    "mech": "Rondel movement — your value moves you exactly that far around the ring; land only on unopened crypts.",
+    "crypts": [
+      { "em": "🕯️", "rw": { "gold": 1 } }, { "em": "⚱️", "rw": { "mana": 1 } },
+      { "em": "💀", "rw": { "glory": 1 } }, { "em": "🕸️", "rw": { "xp": 1 } },
+      { "em": "🪦", "rw": { "gold": 2 } }, { "em": "💀", "rw": { "glory": 1 } },
+      { "em": "🦴", "rw": { "mana": 1 } }, { "em": "⚰️", "rw": { "xp": 1 } },
+      { "em": "💀", "rw": { "glory": 2 } }, { "em": "🏺", "rw": { "gold": 2 } }
+    ],
+    "bonus": { "glory": 1, "def": 1 },
+    "runeSpots": { "1": "ember", "4": "tide", "6": "gale", "9": "stone" }
+  },
+  "warcamp": {
+    "id": "warcamp", "svg": "fd-warcamp", "suit": "S", "track": "glory",
+    "name": "The War Camp",
+    "mech": "Blackjack muster — grow a line's sum into the 12–18 band and charge; overshoot and it routs.",
+    "low": 12, "high": 18, "strong": 15, "maxCards": 5,
+    "lineRunes": ["ember", "stone"]
+  },
+  "thicket": {
+    "id": "thicket", "svg": "fd-thicket", "suit": "C", "track": "lore",
+    "name": "The Deep Thicket",
+    "mech": "Spatial clearing — card size clears 1–3 touching cells; complete rows for Lore.",
+    "cellRewards": { "1": { "gold": 1 }, "3": { "mana": 1 }, "6": { "xp": 1 }, "9": { "gold": 1 }, "12": { "mana": 1 }, "14": { "xp": 1 } },
+    "runeSpots": { "0": "gale", "5": "ember", "10": "tide", "15": "stone" }
+  },
+  "stones": {
+    "id": "stones", "svg": "fd-stones", "suit": "C", "track": "lore",
+    "name": "The Standing Stones",
+    "mech": "Rising sums — each stone pair must out-sum the pair before it.",
+    "pairRewards": [{ "lore": 1 }, { "lore": 1, "gold": 1 }, { "lore": 1, "mana": 1 }, { "lore": 2, "xp": 1 }],
+    "runeSpots": { "1": "stone", "2": "gale" }
+  },
+  "road": {
+    "id": "road", "svg": "fd-road", "suit": "H", "track": "spirit",
+    "name": "The Pilgrim Road",
+    "mech": "One-way trail — move to the shrine matching your exact value; passed shrines are lost.",
+    "shrines": [
+      { "v": 2, "em": "🕯️", "rw": { "mana": 1 } }, { "v": 3, "em": "⛩️", "rw": { "spirit": 1 } },
+      { "v": 4, "em": "🌸", "rw": { "heal": 2 } }, { "v": 6, "em": "⛩️", "rw": { "spirit": 1 } },
+      { "v": 7, "em": "🏮", "rw": { "gold": 2 } }, { "v": 8, "em": "⛩️", "rw": { "spirit": 1 } },
+      { "v": 9, "em": "🕯️", "rw": { "mana": 2 } }, { "v": 10, "em": "🗻", "rw": { "spirit": 2 } }
+    ],
+    "runeSpots": { "1": "gale", "4": "ember", "6": "tide" }
+  },
+  "oracle": {
+    "id": "oracle", "svg": "fd-oracle", "suit": "H", "track": "spirit",
+    "name": "The Veiled Oracle",
+    "mech": "Prophecy — bet on next turn's first Omen card, higher or lower; false prophecies burn the slot.",
+    "rewards": [{ "spirit": 1 }, { "spirit": 1, "mana": 1 }, { "spirit": 1 }, { "spirit": 2, "xp": 1 }],
+    "runeGrants": { "1": "tide", "3": "gale" }
+  },
+  "gemcutter": {
+    "id": "gemcutter", "svg": "fd-gemcutter", "suit": "D", "track": "fortune",
+    "name": "The Gemcutter's Bench",
+    "mech": "Pattern rows — three equal, a strict +1 run, and exactly 21.",
+    "gems": {
+      "emerald": { "em": "💚", "name": "Emerald", "hint": "three equal values", "rw": { "fortune": 2 }, "rune": "stone" },
+      "ruby": { "em": "❤️", "name": "Ruby", "hint": "a strict +1 run", "rw": { "fortune": 2 }, "rune": "ember" },
+      "diamond": { "em": "💎", "name": "Diamond", "hint": "exactly 21 in three", "rw": { "fortune": 2, "gold": 2 }, "rune": "tide" }
+    }
+  },
+  "traderoute": {
+    "id": "traderoute", "svg": "fd-traderoute", "suit": "D", "track": "fortune",
+    "name": "The Trade Roads",
+    "mech": "Network — roads need value ≥ cost and must connect; towns pay out.",
+    "towns": [
+      { "n": "Harbor", "x": 40, "y": 120, "rw": { "gold": 2 } }, { "n": "Mill", "x": 95, "y": 35, "rw": { "mana": 1 } },
+      { "n": "Ford", "x": 150, "y": 120, "rw": { "gold": 1 } }, { "n": "Abbey", "x": 205, "y": 30, "rw": { "xp": 1 } },
+      { "n": "Mine", "x": 260, "y": 110, "rw": { "gold": 2, "mana": 1 } }, { "n": "Keep", "x": 150, "y": 60, "rw": { "def": 1 } }
+    ],
+    "edges": [
+      { "a": 0, "b": 1, "req": 3 }, { "a": 0, "b": 2, "req": 4 }, { "a": 1, "b": 5, "req": 4 }, { "a": 2, "b": 5, "req": 5 },
+      { "a": 1, "b": 3, "req": 6 }, { "a": 2, "b": 4, "req": 7 }, { "a": 3, "b": 4, "req": 8 }, { "a": 3, "b": 5, "req": 9 }
+    ],
+    "stars": { "3": 1, "4": 1, "5": 1, "6": 2 },
+    "townRunes": { "1": "gale", "4": "ember", "5": "stone" }
+  },
+  "tower": {
+    "id": "tower", "svg": "fd-tower", "suit": "any", "track": "spirit",
+    "name": "The Wizard's Tower", "icon": "🗼",
+    "blurb": "Any suit. Write 5 floors bottom-up, each strictly lower than the floor below. Big Spirit payoff.",
+    "floors": [{ "mana": 1 }, { "xp": 1 }, { "spirit": 1 }, { "mana": 1, "gold": 1 }, { "spirit": 2, "def": 1 }],
+    "runeSpots": { "2": "gale", "4": "tide" }
+  },
+  "bog": {
+    "id": "bog", "svg": "fd-bog", "suit": "SC", "track": "glory",
+    "name": "The Beast Bog", "icon": "🐊",
+    "blurb": "♠/♣ only. Trap beasts with matching pairs for Glory and gold.",
+    "glory": [1, 1, 2], "emoji": ["🐗", "🐺", "🐻"], "penTrapRune": "stone"
+  },
+  "tavern": {
+    "id": "tavern", "svg": "fd-tavern", "suit": "HD", "track": "fortune",
+    "name": "The Gilded Tavern", "icon": "🍺",
+    "blurb": "♥/♦ only. Build a run of adjacent values for gold and Fortune.",
+    "boxes": [{ "gold": 1 }, { "mana": 1 }, { "gold": 2 }, { "xp": 1 }, { "fortune": 2, "gold": 2 }],
+    "runeSpots": { "2": "ember", "4": "tide" }
+  },
+  "unlockCost": [3, 5, 7]
+}
