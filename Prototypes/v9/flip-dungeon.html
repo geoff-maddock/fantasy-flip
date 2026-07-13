@@ -113,11 +113,12 @@
     #game.on{
       display:grid;
       grid-template-columns:clamp(360px, 30vw, 440px) 1fr;
-      grid-template-rows:auto 1fr;
-      grid-template-areas:"top top" "rail main";
+      grid-template-rows:auto auto 1fr;
+      grid-template-areas:"top top" "bar bar" "rail main";
       gap:16px; align-items:start;
     }
     #topbar{grid-area:top;}
+    #playerbar{grid-area:bar;}
     #leftrail{
       display:flex; flex-direction:column; gap:14px;
       grid-area:rail;
@@ -480,6 +481,99 @@
   @keyframes flashbg{0%{background:rgba(212,175,55,.35);}100%{background:transparent;}}
   #chron-stats{display:flex; gap:10px; flex-wrap:wrap; margin:10px 0;}
   #chron-stats .pill{font-size:.9rem;}
+
+  /* ================= MULTIPLAYER ================= */
+
+  /* the party strip — every hero's standing, always on screen */
+  #playerbar{display:flex; gap:10px; flex-wrap:wrap;}
+  .ptab{
+    --pc:var(--gold);
+    flex:1 1 170px; min-width:150px;
+    display:grid; grid-template-columns:auto 1fr auto; grid-template-areas:"dot nm sc" "pk pk wd";
+    gap:2px 8px; align-items:center;
+    background:var(--panel); border:1px solid var(--line-soft);
+    border-left:5px solid var(--pc);
+    border-radius:10px; padding:8px 12px; cursor:pointer;
+    transition:background .12s, transform .12s, box-shadow .12s;
+  }
+  .ptab:hover{background:var(--panel-hi); transform:translateY(-1px);}
+  .ptab.on{
+    background:var(--panel-hi);
+    box-shadow:0 0 0 2px var(--pc), var(--shadow-soft);
+  }
+  .ptab.passed{opacity:.55;}
+  .ptab .pdot{grid-area:dot; width:12px; height:12px; border-radius:50%;
+    box-shadow:0 0 0 2px rgba(0,0,0,.35);}
+  .ptab .pnm{grid-area:nm; font-family:var(--font-display); font-size:.95rem; color:var(--parch);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .ptab .psc{grid-area:sc; font-family:var(--font-display); font-weight:700; color:var(--gold-hi);}
+  .ptab .ppk{grid-area:pk; font-size:.78rem; color:#b8a37e;}
+  .ptab .pwd{grid-area:wd; font-size:.78rem; color:#b8a37e; text-align:right; white-space:nowrap;}
+
+  /* the little colour chip used in the log, the topbar and the score table */
+  .ptag{
+    display:inline-flex; align-items:center; gap:4px;
+    padding:1px 8px; border-radius:999px;
+    font-family:var(--font-display); font-size:.78rem; font-weight:700;
+    color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.45);
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.18);
+  }
+  #ui-who{font-size:.9rem; padding:3px 12px;}
+
+  /* hero tokens standing on a shared board space */
+  .tokrow{position:absolute; top:2px; right:3px; display:flex; gap:2px;}
+  .ptoken{
+    width:14px; height:14px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:.6rem; color:#fff; line-height:1;
+    box-shadow:0 0 0 1.5px rgba(0,0,0,.5);
+  }
+
+  /* a board everyone writes on gets a gold rope around it */
+  .board.shared{
+    border-color:var(--gold-dk);
+    box-shadow:var(--shadow), inset 0 0 0 1px rgba(212,175,55,.22);
+  }
+  .board.shared > h2::after{
+    content:'SHARED'; margin-left:8px; padding:1px 7px; border-radius:999px;
+    font-size:.62rem; letter-spacing:.1em;
+    background:var(--gold-dk); color:#1b1610; vertical-align:2px;
+  }
+
+  /* --- setup --- */
+  #countgrid{display:flex; gap:10px; flex-wrap:wrap;}
+  #herogrid{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:10px;}
+  .herocard{
+    --pc:var(--gold);
+    flex:1 1 170px; min-width:150px;
+    background:var(--panel); border:1px solid var(--line-soft);
+    border-top:4px solid var(--pc);
+    border-radius:10px; padding:10px; cursor:pointer;
+    transition:background .12s, box-shadow .12s;
+  }
+  .herocard:hover{background:var(--panel-hi);}
+  .herocard.selected{background:var(--panel-hi); box-shadow:0 0 0 2px var(--pc);}
+  .herocard .hcolor{
+    display:inline-block; padding:1px 8px; border-radius:999px;
+    font-family:var(--font-display); font-size:.7rem; letter-spacing:.08em;
+    color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.45);
+  }
+  .herocard .hname{
+    display:block; width:100%; margin:7px 0 5px;
+    background:#14100b; color:var(--parch);
+    border:1px solid var(--line); border-radius:6px; padding:5px 7px;
+    font-family:var(--font-display); font-size:.95rem;
+  }
+  .herocard .hcls{font-family:var(--font-body); color:var(--parch2); font-size:.9rem;}
+  #advgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:8px;}
+  .advcard{
+    background:var(--panel); border:1px solid var(--gold-dk); border-radius:10px; padding:9px 11px;
+  }
+  .advcard h3{
+    font-family:var(--font-display); color:var(--gold-hi); font-size:.95rem;
+    margin:0 0 5px; display:flex; align-items:center; gap:7px;
+  }
+  .advcard .emblem{width:22px; height:22px; flex:none;}
   .chronrow{cursor:pointer;}
   .chronrow:hover{background:#241b10;}
   #chron-log{background:#151009; border:1px solid var(--line-soft); border-radius:8px;
@@ -693,14 +787,22 @@
 <div class="overlay" id="setup">
   <div class="modal">
     <h1><svg class="emblem big" style="width:52px;height:52px;vertical-align:-14px;"><use href="#fd-crest"/></svg> Flip Dungeon <svg class="emblem big" style="width:52px;height:52px;vertical-align:-14px;"><use href="#fd-crest"/></svg></h1>
-    <p class="tagline">A flip-and-write of perilous delves and calculated greed — playtest prototype v0.3</p>
+    <p class="tagline">A flip-and-write of perilous delves and calculated greed — 1–4 heroes at one table — playtest prototype v0.4</p>
     <div class="center" id="resumewrap" style="display:none; margin-top:10px;">
       <button class="primary" onclick="resumeGame()">▶ Resume Saved Game</button>
       <button class="danger tiny" onclick="abandonSave()">Abandon it</button>
     </div>
-    <h2>Choose Your Hero</h2>
+    <h2>The Party <span class="note" style="font-variant:normal; letter-spacing:0;">— one screen, one table; every hero plays the same turn</span></h2>
+    <div id="countgrid"></div>
+    <h2 id="herohdr">Choose Your Hero</h2>
+    <div id="herogrid"></div>
     <div id="classgrid"></div>
-    <h2>Choose Your Adventure Boards <span class="note" style="font-variant:normal; letter-spacing:0;">— one per suit; mix for different puzzles each game</span></h2>
+    <div id="advwrap" style="display:none;">
+      <h2>The Adventure Boards <span class="note" style="font-variant:normal; letter-spacing:0;">— shared ground; everyone writes on these, in their own colour</span></h2>
+      <p class="note" id="advnote"></p>
+      <div id="advgrid"></div>
+    </div>
+    <h2 id="boardhdr">Choose Your Personal Boards <span class="note" style="font-variant:normal; letter-spacing:0;">— one per suit; every hero gets their own copy</span></h2>
     <div id="boardpick"></div>
     <h2>Difficulty</h2>
     <div id="diffgrid" style="display:flex; gap:10px; flex-wrap:wrap;"></div>
@@ -746,6 +848,18 @@
        <kbd class="suit" style="color:#a03030">♦</kbd> <b>Market</b> — sell the card for gold (half its value, rounded up), or buy an item: card value must reach the price, and you pay the price in gold.</p>
     <p><b>Face cards are events</b>, not numbers: <b>Jack</b> = +3 gold · <b>Queen</b> = +2 mana <i>or</i> heal 2 wounds · <b>King</b> = +1 XP and −1 Threat. <b>Aces</b> count as 1 and grant +1 XP when written.</p>
     <p>Any taken number card may instead be <b>camped</b> for 1 gold if you have no good use for it.</p>
+    <h2>Playing with 1–4 Heroes</h2>
+    <p>Choose <b>1 to 4 players</b> at setup. Each hero picks a class, a name and takes one of four colours — <span style="color:#f0897d">Crimson</span>, <span style="color:#7db6e8">Azure</span>, <span style="color:#8ccf97">Verdant</span>, <span style="color:#c096dc">Amethyst</span>. Everyone plays at <b>one screen</b>, and everyone plays <b>the same turn at the same time</b>: there is no turn order. Click a hero in the party strip to take the table, act whenever you like, and hit <b>Pass</b> when you're done. The turn only advances once <b>every</b> hero has passed.</p>
+    <p><b>Personal boards.</b> Each hero has their <i>own</i> copy of the four suit boards, their own hero deck and hand, and their own gold, mana, XP, wounds, Defense and stars. Only the hero holding the table has their boards on screen.</p>
+    <p><b>The Omen Row is shared</b> — and it grows with the party: <b>4</b> cards solo, <b>6</b> / <b>8</b> / <b>10</b> for 2 / 3 / 4 heroes. Everyone drafts 2 cards from the same row, first come first served. <b>A card you take is gone for everyone else.</b> Leftover face cards raise the Threat for the whole table.</p>
+    <p><b>Adventure boards.</b> Four boards exist <b>once</b>, for everybody, and are marked in your colour:<br>
+      <kbd class="suit">♠</kbd> <b>Catacombs of the Nameless</b> — every hero walks their own token around one shared ring. A crypt you prise open is <b>claimed and gone</b>.<br>
+      <kbd class="suit">♣</kbd> <b>The Deep Thicket</b> — a sixteen-cell land grab. Every cell you clear is stained your colour; whoever completes a row takes its Lore.<br>
+      <kbd class="suit" style="color:#a03030">♦</kbd> <b>The Trade Roads</b> — rival networks on one map. Roads are laid in your colour, and each town pays only the <b>first</b> hero whose network reaches it.<br>
+      <b>The Tyrant's Gambit</b> (any suit) — one court, a Champion each. Champions block one another, and every courtier can be slain only once.</p>
+    <p>Because these four are shared, they leave the personal pool: your ♠/♣/♦ picks are Dungeon or War Camp, Wildwood or Standing Stones, Market or Gemcutter. At game end, whoever <b>holds the most</b> of each contested board takes a <b>majority bonus</b> (+2⭐, or +1⭐ each if tied) — so the land grab pays.</p>
+    <p><b>The Assault is shared, the defending is not.</b> One Threat builds for the whole table, and at dusk the horde falls on <b>each hero in turn</b> — every one of them answers it with their own Defense and takes their own Wounds. Bribing the horde helps everybody; hiring guards helps only you.</p>
+    <p><b>Winning.</b> Every hero scores individually and the <b>highest score wins</b>. Solo play is exactly the original game.</p>
     <h2>Board Selection</h2>
     <p>At setup you choose <b>one board per suit</b> from three options each — 81 combinations. Every board scores into its suit's star track (♠ Glory, ♣ Lore, ♥ Spirit, ♦ Fortune) but plays by different rules: gauntlets, rondels, blackjack musters, spatial clearing, rising sums, one-way pilgrimages, prophecies, pattern-cutting, and road networks. Mix them for a different puzzle every game.</p>
     <h2>Bending Fate</h2>
@@ -780,6 +894,7 @@
 <div id="game">
   <div id="topbar">
     <span class="title"><svg class="emblem"><use href="#fd-crest"/></svg> Flip Dungeon</span>
+    <span class="ptag" id="ui-who" style="display:none;"></span>
     <span class="pill">Round <b id="ui-round">1</b>/3 · Turn <b id="ui-turn">1</b>/5<span id="ui-pips"></span></span>
     <span class="pill res">🪙 <b id="ui-gold">0</b></span>
     <span class="pill res">🔮 <b id="ui-mana">0</b></span>
@@ -798,9 +913,11 @@
     <button class="danger" onclick="quitGame()">Quit</button>
   </div>
 
+  <div id="playerbar" style="display:none;"></div>
+
   <div id="leftrail">
     <div id="omenwrap">
-      <h2>🃏 The Omen Row <span class="hint">— take 2 cards each turn; leftover face cards raise the Threat</span></h2>
+      <h2>🃏 The Omen Row <span class="hint">— shared! take 2 cards each turn; a card taken is gone for everyone. Leftover face cards raise the Threat</span></h2>
       <div id="omenrow"></div>
       <div style="margin-top:12px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
         <button class="primary" id="endturnbtn" onclick="endTurn()">End Turn</button>
@@ -1100,7 +1217,16 @@
 <script>
 "use strict";
 /* ==================================================================
-   FLIP DUNGEON v0.3 — solo playtest prototype
+   FLIP DUNGEON v0.4 — playtest prototype, 1–4 players (local hotseat)
+
+   Multiplayer shape:
+     WORLD    — everything shared: the clock, the adventure deck, the Omen Row, the
+                Threat, and the four contested Adventure boards.
+     PLAYERS  — each hero's own boards, deck, hand and resources.
+     S        — the ACTIVE hero. The shared fields above are aliased onto every player
+                (see linkShared), so the original single-player engine code still reads
+                `S.row` / `S.threat` / `S.round` and gets the shared value.
+   All heroes act in the same turn, in any order; the turn advances when all have passed.
    ================================================================== */
 
 /* ---------- persistence ---------- */
@@ -1301,13 +1427,67 @@ const SPELLS = [
   {id:'timewarp',  icon:'⏳', name:'Time Warp',  mana:3, min:10, desc:'Combined ≥ 10: gain +1 pick this turn and draw 1 hero card.'},
 ];
 
+/* ---------- multiplayer ---------- */
+const PLAYER_COLORS = [
+  {id:'crimson',  name:'Crimson',  hex:'#c0392b', soft:'#f0897d', ink:'#fff'},
+  {id:'azure',    name:'Azure',    hex:'#2f6fae', soft:'#7db6e8', ink:'#fff'},
+  {id:'verdant',  name:'Verdant',  hex:'#3f8b4c', soft:'#8ccf97', ink:'#fff'},
+  {id:'amethyst', name:'Amethyst', hex:'#7c4b9e', soft:'#c096dc', ink:'#fff'},
+];
+// Boards promoted to shared Adventure boards in multiplayer — removed from the personal pool.
+const ADVENTURE_BOARDS = ['catacombs', 'thicket', 'traderoute'];
+const ADVENTURE_INFO = [
+  {svg:'fd-catacombs', suit:'♠', name:'Catacombs of the Nameless',
+   desc:'A shared ring of ten crypts. Each hero walks their own token around it; a crypt opened is claimed in your colour and is gone for everyone else.'},
+  {svg:'fd-thicket', suit:'♣', name:'The Deep Thicket',
+   desc:'A sixteen-cell land grab. Every cell you clear is stained your colour. Whoever completes a row takes the Lore — race for the ground.'},
+  {svg:'fd-traderoute', suit:'♦', name:'The Trade Roads',
+   desc:'One map, rival networks. Roads are laid in your colour and each town pays only the FIRST hero whose network reaches it.'},
+  {svg:'fd-chess', suit:'any', name:"The Tyrant's Gambit",
+   desc:'One court, many Champions. Each hero fields a Champion in their colour; the court is shared, and every courtier can be slain only once.'},
+];
+function isMP(){ return MPN > 1; }
+/* In multiplayer the Adventure boards are always in play (shared, contested).
+   Solo, they are just the board you picked for that suit / the chess module. */
+function cataOn(){    return isMP() || SETTINGS.boards.S==='catacombs'; }
+function thicketOn(){ return isMP() || SETTINGS.boards.C==='thicket'; }
+function routeOn(){   return isMP() || SETTINGS.boards.D==='traderoute'; }
+function chessOn(){   return isMP() || SETTINGS.chess; }
+function pcolor(i){ return PLAYER_COLORS[i % 4]; }
+function pname(i){ return PLAYERS[i] ? PLAYERS[i].name : 'Player '+(i+1); }
+// board pool for the personal picks — the shared Adventure boards drop out in multiplayer
+function personalPool(suit){
+  return BOARD_POOL[suit].filter(b => MPN<=1 || !ADVENTURE_BOARDS.includes(b.id));
+}
+
 /* ---------- state ---------- */
-let S = null;
+let S = null;          // the ACTIVE player's state
+let WORLD = null;      // everything shared: decks, row, threat, clock, Adventure boards
+let PLAYERS = [];      // every player's personal state
+let ACTIVE = 0;        // index of the player whose boards are on screen
+let MPN = 1;           // number of players
 let SETTINGS = {attrs:false, followers:false, spells:false, pyl:false, chess:false, runes:false, diff:'adventurer',
   boards:{S:'dungeon', C:'forest', H:'temple', D:'market'}};
 let chosenClass = null;
 let chosenDiff = 'adventurer';
 let chosenBoards = {S:'dungeon', C:'forest', H:'temple', D:'market'};
+let chosenCount = 1;
+let chosenHeroes = [{cls:null, name:'Player 1'}, {cls:null, name:'Player 2'},
+                    {cls:null, name:'Player 3'}, {cls:null, name:'Player 4'}];
+
+/* Fields that live on WORLD but are read/written as `S.x` throughout the engine.
+   Aliasing them onto every player state keeps ~2000 lines of single-player code correct. */
+const SHARED_KEYS = ['round','turn','deck','discard','row','threat','cata','grid','routes','chess','log'];
+function linkShared(p){
+  for(const k of SHARED_KEYS){
+    Object.defineProperty(p, k, {
+      get(){ return WORLD[k]; },
+      set(v){ WORLD[k] = v; },
+      enumerable:false, configurable:true,
+    });
+  }
+  return p;
+}
 
 function newDeck(){
   const d = [];
@@ -1316,14 +1496,42 @@ function newDeck(){
   return d;
 }
 
-function initState(cls){
-  S = {
-    cls, round:1, turn:1,
+// The Omen Row must feed every hero: 4 cards solo, +2 for each extra player.
+function rowSize(){ return 4 + 2*(MPN-1); }
+
+function newWorld(){
+  return {
+    round:1, turn:1,
     deck:newDeck(), discard:[],
+    row:[], threat:0,
+    // --- shared Adventure boards (owner index or null) ---
+    cata:{visited:Array(10).fill(null), done:false},
+    grid:Array(16).fill(null),
+    thicketRows:[false,false,false,false],
+    routes:{built:Array(8).fill(null), towns:Array(6).fill(null)},
+    chess:{pieces:[
+      {t:'R', r:0, c:0, alive:true, rw:{glory:1}},
+      {t:'K', r:0, c:2, alive:true, rw:{glory:2, xp:2}},
+      {t:'B', r:0, c:4, alive:true, rw:{spirit:1}},
+      {t:'N', r:1, c:1, alive:true, rw:{mana:2}},
+      {t:'P', r:1, c:3, alive:true, rw:{gold:1}},
+      {t:'P', r:2, c:2, alive:true, rw:{gold:1}},
+    ]},
+    assaultQueue:[],
+    log:[],
+  };
+}
+
+// Champions start on separate squares so they never begin stacked.
+const CHAMP_STARTS = [[4,2],[4,0],[4,4],[3,2]];
+
+function newPlayer(cls, idx, name){
+  return linkShared({
+    idx, cls, name: name || ('Player '+(idx+1)), color: pcolor(idx).id,
     pdeck:newDeck(), pdiscard:[],
-    row:[], hand:[],
+    hand:[],
     draftsLeft:2,
-    threat:0,
+    passed:false,
     gold:diff().gold, mana:diff().mana, xp:0, wounds:0,
     glory:0, lore:0, spirit:0, fortune:0,
     defBonus:0,
@@ -1334,22 +1542,15 @@ function initState(cls){
     unlocked:{tower:false, bog:false, tavern:false},
     unlockCount:0,
     tower:[], pens:[[],[],[]], run:[],
-    cata:{pos:-1, visited:Array(10).fill(false), done:false},
+    cataPos:-1,                       // this hero's token on the shared ring
     lines:[{vals:[], st:'open'},{vals:[], st:'open'}],
-    grid:Array(16).fill(false), fill:null, // fill:{left, cells:[]}
+    fill:null,                        // in-progress Thicket clearing: {left, cells:[]}
     stones:[[],[],[],[]],
     roadPos:-1,
     oracle:{slots:[], pending:null},
     gems:{emerald:[], ruby:[], diamond:[]},
-    routes:{built:Array(8).fill(false), towns:Array(6).fill(false)},
-    chess:{champ:[4,2], pieces:[
-      {t:'R', r:0, c:0, alive:true, rw:{glory:1}},
-      {t:'K', r:0, c:2, alive:true, rw:{glory:2, xp:2}},
-      {t:'B', r:0, c:4, alive:true, rw:{spirit:1}},
-      {t:'N', r:1, c:1, alive:true, rw:{mana:2}},
-      {t:'P', r:1, c:3, alive:true, rw:{gold:1}},
-      {t:'P', r:2, c:2, alive:true, rw:{gold:1}},
-    ]},
+    routeTowns:Array(6).fill(false),  // towns THIS hero's network reaches (payout may be another's)
+    champ:[...CHAMP_STARTS[idx % 4]], // this hero's Champion on the shared court
     attrs:{might:0, agility:0, wisdom:0, spirit:0},
     followers:{squire:0, herbalist:0, acolyte:0, trader:0},
     trailBreaks:0, parityBreaks:0,
@@ -1363,14 +1564,44 @@ function initState(cls){
     delve:null,   // {depth, lootG, lootM, blacks, flips:[]}
     assault:null, // {base, def, bonusDef, bonusThreat, flips:[], resolved}
     active:null,
-    log:[],
-  };
+  });
+}
+
+// heroes: [{cls, name}, ...]
+function initGame(heroes){
+  MPN = heroes.length;
+  WORLD = newWorld();
+  PLAYERS = heroes.map((h,i)=>newPlayer(h.cls, i, h.name));
+  ACTIVE = 0;
+  S = PLAYERS[0];
+}
+// kept for the Proving Grounds / spectate bots, which are always solo
+function initState(cls){ initGame([{cls, name:'Player 1'}]); }
+
+function setActive(i){
+  if(i<0 || i>=PLAYERS.length) return;
+  if(S && S.fill){ log('Finish clearing the Thicket cells first.', 'bad'); return; }
+  ACTIVE = i;
+  S = PLAYERS[i];
+  renderAll();
+}
+
+/* Run player-scoped engine code (rewards, prophecies, the assault) as some OTHER player.
+   Everything downstream reads the `S` global, so we point it at them and put it back. */
+function asPlayer(p, fn){
+  const prevS = S, prevA = ACTIVE;
+  S = p; ACTIVE = p.idx;
+  try { return fn(); } finally { S = prevS; ACTIVE = prevA; }
 }
 
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
 let LAB=false, WATCH=false, LAB_RESULT=null;
-function log(msg, cls){ S.log.unshift({msg, cls:cls||'lt'}); if(!LAB) renderLog(); }
+function log(msg, cls, who){
+  const p = (who===undefined) ? ACTIVE : who;
+  WORLD.log.unshift({msg, cls:cls||'lt', p: isMP() ? p : null});
+  if(!LAB) renderLog();
+}
 function starStr(n){ return n>0 ? '⭐'.repeat(n) : '—'; }
 function attrL(k){ return SETTINGS.attrs ? (S.attrs[k]||0) : 0; }
 function shuffleInPlace(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} }
@@ -1381,10 +1612,11 @@ function drawAdv(){
   }
   return S.deck.pop();
 }
-function drawHero(){
-  if(S.pdeck.length===0){ S.pdeck=S.pdiscard; S.pdiscard=[]; shuffleInPlace(S.pdeck); }
-  return S.pdeck.pop();
+function drawHeroFor(p){
+  if(p.pdeck.length===0){ p.pdeck=p.pdiscard; p.pdiscard=[]; shuffleInPlace(p.pdeck); }
+  return p.pdeck.pop();
 }
+function drawHero(){ return drawHeroFor(S); }
 function totalDefense(){
   let d = S.defBonus + (S.tempDef||0);
   if(S.cls==='knight') d+=1;
@@ -1420,7 +1652,8 @@ function tweakCost(){
   return 1;
 }
 function isFace(c){ return c.rank>=11; }
-function handLimit(){ return (SETTINGS.pyl && S.wounds>=5) ? 2 : 3; }
+function handLimitFor(p){ return (SETTINGS.pyl && p.wounds>=5) ? 2 : 3; }
+function handLimit(){ return handLimitFor(S); }
 function trapLimit(room){ return room.thr + (S.items['Torch']?1:0) + (attrL('agility')>=1?1:0); }
 function fightNeed(room){ return room.thr - (S.items['Sword']?1:0) - (attrL('might')>=2?1:0); }
 
@@ -1514,53 +1747,146 @@ function recruit(kind){
 /* ==================================================================
    SETUP / PERSISTENCE
    ================================================================== */
+let setupSlot = 0;   // which hero we are currently kitting out
+
 function renderSetup(){
-  const g = $('classgrid');
-  g.innerHTML = Object.entries(CLASSES).map(([k,c])=>`
-    <div class="classcard ${chosenClass===k?'selected':''}" onclick="pickClass('${k}')">
+  // --- party size ---
+  $('countgrid').innerHTML = [1,2,3,4].map(n=>`
+    <div class="classcard ${chosenCount===n?'selected':''}" style="flex:1 1 150px;" onclick="pickCount(${n})">
+      <h3>${n===1?'🧍':'🧑‍🤝‍🧑'.repeat(1)} ${n===1?'Solo':n+' Players'}</h3>
+      <div class="cp">${n===1
+        ? 'The original delve — every board is yours alone.'
+        : n+' heroes at one screen. Omen Row of '+(4+2*(n-1))+' cards, shared. '+n+' rival colours on the Adventure boards.'}</div>
+    </div>`).join('');
+
+  // --- heroes ---
+  const mp = chosenCount>1;
+  $('herohdr').textContent = mp ? 'The Heroes' : 'Choose Your Hero';
+  $('herogrid').style.display = mp ? 'flex' : 'none';
+  if(mp){
+    $('herogrid').innerHTML = chosenHeroes.slice(0,chosenCount).map((h,i)=>{
+      const c = pcolor(i);
+      const cls = h.cls ? CLASSES[h.cls] : null;
+      return `<div class="herocard ${setupSlot===i?'selected':''}" style="--pc:${c.hex}" onclick="pickSlot(${i})">
+        <div class="hcolor" style="background:${c.hex}">${c.name}</div>
+        <input class="hname" value="${h.name}" onclick="event.stopPropagation()"
+               oninput="setHeroName(${i}, this.value)" maxlength="14">
+        <div class="hcls">${cls ? cls.icon+' '+cls.name : '<span class="note">— pick a hero below —</span>'}</div>
+      </div>`;
+    }).join('');
+  }
+  const sel = mp ? chosenHeroes[setupSlot].cls : chosenClass;
+  $('classgrid').innerHTML = Object.entries(CLASSES).map(([k,c])=>`
+    <div class="classcard ${sel===k?'selected':''}" onclick="pickClass('${k}')">
       <h3><span class="cicon">${c.icon}</span> ${c.name}</h3>
       <div class="cp"><b>Passive:</b> ${c.passive}</div>
       <div class="cp"><b>Ability:</b> ${c.active}</div>
     </div>`).join('');
-  $('startbtn').disabled = !chosenClass;
+
+  const ready = mp ? chosenHeroes.slice(0,chosenCount).every(h=>h.cls) : !!chosenClass;
+  $('startbtn').disabled = !ready;
+  $('startbtn').textContent = mp ? 'Begin the Adventure — '+chosenCount+' heroes' : 'Begin the Adventure';
   $('resumewrap').style.display = store.get(K_CUR) ? 'block' : 'none';
-  $('boardpick').innerHTML = Object.entries(BOARD_POOL).map(([suit,list])=>`
-    <div class="picklabel">${SUITS[suit].sym} ${SUITS[suit].name} board</div>
+
+  // --- shared Adventure boards (multiplayer only) ---
+  $('advwrap').style.display = mp ? 'block' : 'none';
+  if(mp){
+    $('advnote').innerHTML = 'These four boards exist <b>once</b>, for the whole table. Everyone writes on them and every claim is stamped in your colour — '+
+      'a crypt prised open, a cell cleared, a road laid or a courtier slain is <b>gone for everyone else</b>. ' +
+      'At the end, whoever holds the most of each board takes a majority bonus. They are not offered as personal boards.';
+    $('advgrid').innerHTML = ADVENTURE_INFO.map(a=>`
+      <div class="advcard">
+        <h3><svg class="emblem" style="color:var(--gold)"><use href="#${a.svg}"/></svg> ${a.name}
+          <span class="note">${a.suit==='any'?'any suit':a.suit}</span></h3>
+        <div class="cp">${a.desc}</div>
+      </div>`).join('');
+  }
+
+  // --- personal boards (the Adventure boards drop out of the pool in multiplayer) ---
+  $('boardhdr').innerHTML = mp
+    ? 'Personal Boards <span class="note" style="font-variant:normal; letter-spacing:0;">— one per suit; every hero gets their OWN copy of each</span>'
+    : 'Choose Your Adventure Boards <span class="note" style="font-variant:normal; letter-spacing:0;">— one per suit; mix for different puzzles each game</span>';
+  $('boardpick').innerHTML = Object.keys(BOARD_POOL).map(suit=>{
+    const list = personalPool(suit);
+    if(!list.some(b=>b.id===chosenBoards[suit])) chosenBoards[suit] = list[0].id;
+    return `<div class="picklabel">${SUITS[suit].sym} ${SUITS[suit].name} board</div>
     <div class="pickrow">${list.map(b=>`
       <div class="classcard ${chosenBoards[suit]===b.id?'selected':''}" onclick="pickBoard('${suit}','${b.id}')">
         <h3><svg class="emblem" style="color:var(--ink)"><use href="#${b.svg}"/></svg> ${b.name}</h3>
         <div class="cp">${b.mech}</div>
-      </div>`).join('')}</div>`).join('');
+      </div>`).join('')}</div>`;
+  }).join('');
+
   $('diffgrid').innerHTML = Object.entries(DIFFS).map(([k,d])=>`
     <div class="classcard ${chosenDiff===k?'selected':''}" style="flex:1 1 220px;" onclick="pickDiff('${k}')">
       <h3><span class="cicon">${d.icon}</span> ${d.name}</h3>
       <div class="cp">${d.desc}</div>
     </div>`).join('');
+  // the chess board is folded into the Adventure boards in multiplayer
+  $('mod-chess').closest('.modulebox').style.display = mp ? 'none' : '';
 }
+function pickCount(n){
+  chosenCount = n;
+  MPN = n;                       // personalPool() and the board pick depend on this at once
+  if(setupSlot>=n) setupSlot=0;
+  renderSetup();
+}
+function pickSlot(i){ setupSlot=i; renderSetup(); }
+function setHeroName(i, v){ chosenHeroes[i].name = v.trim() || ('Player '+(i+1)); }
 function pickDiff(k){ chosenDiff=k; renderSetup(); }
 function pickBoard(suit,id){ chosenBoards[suit]=id; renderSetup(); }
-function pickClass(k){ chosenClass=k; renderSetup(); }
+function pickClass(k){
+  if(chosenCount>1){
+    chosenHeroes[setupSlot].cls = k;
+    // hop to the next hero still missing a class, so picking 4 heroes is four clicks
+    const next = chosenHeroes.slice(0,chosenCount).findIndex(h=>!h.cls);
+    if(next>=0) setupSlot = next;
+  } else chosenClass = k;
+  renderSetup();
+}
 function toggleRules(show){ $('rules').style.display = show?'flex':'none'; }
 
 function startGame(){
+  const mp = chosenCount>1;
   SETTINGS = {
     attrs: $('mod-attrs').checked,
     followers: $('mod-followers').checked,
     spells: $('mod-spells').checked,
     pyl: $('mod-pyl').checked,
-    chess: $('mod-chess').checked,
+    chess: mp ? true : $('mod-chess').checked,   // the Gambit is an Adventure board in multiplayer
     runes: $('mod-runes').checked,
     diff: chosenDiff,
     boards: {...chosenBoards},
   };
-  initState(chosenClass);
+  const heroes = mp
+    ? chosenHeroes.slice(0,chosenCount).map(h=>({cls:h.cls, name:h.name}))
+    : [{cls:chosenClass, name:'Player 1'}];
+  initGame(heroes);
   enterGame();
-  log('You set out as the '+CLASSES[S.cls].name+'. Round 1 begins.', 'sys');
+  if(isMP()){
+    log('The party sets out: '+PLAYERS.map(p=>p.name+' the '+CLASSES[p.cls].name).join(', ')+'. Round 1 begins.', 'sys', null);
+    log('The Omen Row holds '+rowSize()+' cards — shared. Take what you need before someone else does.', 'sys', null);
+  } else {
+    log('You set out as the '+CLASSES[S.cls].name+'. Round 1 begins.', 'sys', null);
+  }
   const mods = Object.entries(SETTINGS).filter(([k,v])=>v===true).map(([k])=>k);
-  if(mods.length) log('Experimental modules active: '+mods.join(', ')+'.', 'sys');
+  if(mods.length) log('Experimental modules active: '+mods.join(', ')+'.', 'sys', null);
   startRound();
   startTurn();
   renderAll();
+}
+/* Which boards are on screen. The unlocks are PER HERO, so this must re-run on every
+   player switch — not just once when the game starts. */
+function syncBoards(){
+  for(const k of ['tower','bog','tavern']) $('board-'+k).style.display = S.unlocked[k]?'block':'none';
+  for(const [suit,list] of Object.entries(BOARD_POOL))
+    for(const b of list){
+      const adventure = isMP() && ADVENTURE_BOARDS.includes(b.id);
+      $('board-'+b.id).style.display = (adventure || SETTINGS.boards[suit]===b.id) ? 'block' : 'none';
+      $('board-'+b.id).classList.toggle('shared', adventure);
+    }
+  $('board-chess').style.display = chessOn()?'block':'none';
+  $('board-chess').classList.toggle('shared', isMP());
 }
 function enterGame(){
   $('setup').style.display='none';
@@ -1568,29 +1894,32 @@ function enterGame(){
   $('game').classList.add('on');
   $('attrwrap').style.display = SETTINGS.attrs?'block':'none';
   $('followwrap').style.display = SETTINGS.followers?'block':'none';
-  for(const k of ['tower','bog','tavern']) $('board-'+k).style.display = S.unlocked[k]?'block':'none';
-  for(const [suit,list] of Object.entries(BOARD_POOL))
-    for(const b of list) $('board-'+b.id).style.display = SETTINGS.boards[suit]===b.id?'block':'none';
-  $('board-chess').style.display = SETTINGS.chess?'block':'none';
   $('runewrap').style.display = SETTINGS.runes?'block':'none';
+  syncBoards();
   if(S.delve){ renderDelve(); $('delvemodal').style.display='flex'; }
-  if(S.assault){ renderAssault(); $('assaultmodal').style.display='flex'; $('as-title').textContent='🔥 Monster Assault — Round '+S.round; }
+  if(S.assault){ renderAssault(); $('assaultmodal').style.display='flex'; $('as-title').textContent='🔥 Monster Assault — Round '+WORLD.round; }
 }
 function saveGame(){
   if(LAB || WATCH) return;
-  store.set(K_CUR, {S, SETTINGS, v:3});
+  // the shared keys are non-enumerable aliases, so each player serialises as its own data only
+  store.set(K_CUR, {WORLD, PLAYERS, ACTIVE, MPN, SETTINGS, v:4});
 }
 function resumeGame(){
   const cur = store.get(K_CUR);
-  if(!cur || !cur.S){ return; }
-  // merge over a fresh shape so new fields never come up undefined
-  initState(cur.S.cls);
-  Object.assign(S, cur.S);
+  if(!cur || !cur.WORLD || !cur.PLAYERS) return;
   SETTINGS = Object.assign({attrs:false,followers:false,spells:false,pyl:false,chess:false,runes:false,diff:'adventurer'}, cur.SETTINGS);
   SETTINGS.boards = Object.assign({S:'dungeon',C:'forest',H:'temple',D:'market'}, cur.SETTINGS && cur.SETTINGS.boards);
+  MPN = cur.MPN || cur.PLAYERS.length;
+  // rebuild over fresh shapes so fields added since the save never come up undefined
+  WORLD = Object.assign(newWorld(), cur.WORLD);
+  PLAYERS = cur.PLAYERS.map((sp,i)=>Object.assign(newPlayer(sp.cls, i, sp.name), sp));
+  PLAYERS.forEach(linkShared);
+  ACTIVE = Math.min(cur.ACTIVE||0, PLAYERS.length-1);
+  S = PLAYERS[ACTIVE];
   chosenClass = S.cls;
+  chosenCount = MPN;
   enterGame();
-  log('The tale resumes — Round '+S.round+', Turn '+S.turn+'.', 'sys');
+  log('The tale resumes — Round '+WORLD.round+', Turn '+WORLD.turn+'.', 'sys', null);
   renderAll();
 }
 function abandonSave(){
@@ -1664,59 +1993,118 @@ function clearChronicle(){
    ROUND / TURN FLOW
    ================================================================== */
 function startRound(){
-  S.abilityUsed=false;
-  S.ironhideUsed=false;
-  S.trailBreaks=0; S.parityBreaks=0;
-  for(const c of S.hand) S.pdiscard.push(c);
-  S.hand=[];
-  for(let i=0;i<3;i++){ const c=drawHero(); if(c) S.hand.push(c); }
-  log('Round '+S.round+': you draw a fresh Hero Hand of 3 cards.', 'sys');
+  for(const p of PLAYERS){
+    p.abilityUsed=false;
+    p.ironhideUsed=false;
+    p.trailBreaks=0; p.parityBreaks=0;
+    for(const c of p.hand) p.pdiscard.push(c);
+    p.hand=[];
+    for(let i=0;i<3;i++){ const c=drawHeroFor(p); if(c) p.hand.push(c); }
+  }
+  log('Round '+WORLD.round+': '+(isMP()?'every hero draws':'you draw')+' a fresh Hero Hand of 3 cards.', 'sys', null);
 }
 
 function startTurn(){
-  for(const slot of S.row){ if(!slot.taken) S.discard.push(slot.card); }
-  S.row=[];
-  for(let i=0;i<4;i++){ const c=drawAdv(); if(c) S.row.push({card:c, taken:false}); }
-  S.draftsLeft = (attrL('agility')>=3 && S.turn===5) ? 3 : 2;
-  if(S.draftsLeft===3) log('🤸 SPRINT — you seize 3 picks this turn!', 'sys');
-  S.freeTweakUsed=false;
-  S.polyglotUsed=false;
-  resolveProphecy();
-  S.active=null; S.spellMode=null; S.spellFirst=null;
-  if(S.hand.length<handLimit()){
-    const c=drawHero();
-    if(c){ S.hand.push(c); log('You draw the '+rlbl(c.rank)+SUITS[c.suit].sym+' into your Hero Hand.','lt'); }
+  for(const slot of WORLD.row){ if(!slot.taken) WORLD.discard.push(slot.card); }
+  WORLD.row=[];
+  const n = rowSize();
+  for(let i=0;i<n;i++){ const c=drawAdv(); if(c) WORLD.row.push({card:c, taken:false}); }
+  for(const p of PLAYERS){
+    p.draftsLeft = (SETTINGS.attrs && (p.attrs.agility||0)>=3 && WORLD.turn===5) ? 3 : 2;
+    if(p.draftsLeft===3) log('🤸 SPRINT — '+(isMP()?p.name+' seizes':'you seize')+' 3 picks this turn!', 'sys', p.idx);
+    p.passed=false;
+    p.freeTweakUsed=false;
+    p.polyglotUsed=false;
+    p.active=null; p.spellMode=null; p.spellFirst=null; p.fill=null;
+    resolveProphecyFor(p);
+    if(p.hand.length<handLimitFor(p)){
+      const c=drawHeroFor(p);
+      if(c){ p.hand.push(c); log((isMP()?p.name+' draws':'You draw')+' the '+rlbl(c.rank)+SUITS[c.suit].sym+' into '+(isMP()?'their':'your')+' Hero Hand.','lt', p.idx); }
+    }
+    if(SETTINGS.pyl && p.wounds>=5) log((isMP()?p.name+' is':'You are')+' Battered (5+ wounds): hand limit 2.', 'bad', p.idx);
   }
-  if(SETTINGS.pyl && S.wounds>=5) log('You are Battered (5+ wounds): hand limit 2.', 'bad');
 }
 
+/* Every hero acts in the same turn, in whatever order they like — the turn only
+   advances once all of them have passed. That is what "at the same time" means at one table. */
+function allPassed(){ return PLAYERS.every(p=>p.passed); }
+function nextUnpassed(from){
+  for(let k=1;k<=PLAYERS.length;k++){
+    const i=(from+k)%PLAYERS.length;
+    if(!PLAYERS[i].passed) return i;
+  }
+  return -1;
+}
+
+/* "End Turn" = this hero passes. Others may still be acting. */
 function endTurn(){
   if(S.fill){ log('Finish clearing the Thicket cells first.', 'bad'); return; }
-  if(!LAB && !WATCH && S.draftsLeft>0 && !confirm('You still have '+S.draftsLeft+' pick(s) left. End the turn anyway?')) return;
+  if(S.passed) return;
+  if(!LAB && !WATCH && S.draftsLeft>0 &&
+     !confirm((isMP()?S.name+' still has ':'You still have ')+S.draftsLeft+' pick(s) left. Pass anyway?')) return;
   S.active=null; S.spellMode=null; S.spellFirst=null;
-  if(SETTINGS.chess && chessAttacked(false).has(S.chess.champ[0]+','+S.chess.champ[1])){
-    S.threat += 1;
-    log('♟ The court harries your exposed Champion: +1 🔥 Threat.', 'bad');
+  // the court harries each exposed Champion individually
+  if(chessOn() && chessAttacked(false).has(S.champ[0]+','+S.champ[1])){
+    WORLD.threat += 1;
+    log('♟ The court harries '+(isMP()?S.name+'’s':'your')+' exposed Champion: +1 🔥 Threat.', 'bad');
   }
-  const faces = S.row.filter(s=>!s.taken && isFace(s.card)).length;
-  if(faces>0){ S.threat+=faces; log('Leftover face cards stir the horde: +'+faces+' 🔥 Threat.', 'bad'); }
-  if(S.turn===5){ resolveAssault(); return; }
-  S.turn++;
+  S.passed = true;
+  if(isMP()) log((S.name)+' passes.', 'lt');
+
+  if(!allPassed()){
+    const nx = nextUnpassed(ACTIVE);
+    if(nx>=0) setActive(nx);   // hand the table to someone still thinking
+    else renderAll();
+    return;
+  }
+  advanceTurn();
+}
+
+function advanceTurn(){
+  // leftover face cards stir the horde once, for the whole table
+  const faces = WORLD.row.filter(s=>!s.taken && isFace(s.card)).length;
+  if(faces>0){ WORLD.threat+=faces; log('Leftover face cards stir the horde: +'+faces+' 🔥 Threat.', 'bad', null); }
+  if(WORLD.turn===5){ resolveAssault(); return; }
+  WORLD.turn++;
   startTurn();
-  log('— Turn '+S.turn+' —', 'sys');
+  log('— Turn '+WORLD.turn+' —', 'sys', null);
+  if(isMP()){ ACTIVE=0; S=PLAYERS[0]; }
   renderAll();
 }
 
-/* ---------- assault ---------- */
+/* ---------- assault ----------
+   The horde is one horde: the Threat is shared. But it falls on each hero in turn,
+   and each must answer it with their OWN Defense. */
 function resolveAssault(){
-  S.assault = {base:threatBase(S.round)+S.threat, def:totalDefense(), bonusDef:0, bonusThreat:0, flips:[], resolved:false};
-  S.threat = 0;
+  const base = threatBase(WORLD.round) + WORLD.threat;
+  WORLD.threat = 0;
+  for(const p of PLAYERS){
+    p.assault = {base, def:asPlayer(p, totalDefense), bonusDef:0, bonusThreat:0, flips:[], resolved:false};
+  }
+  WORLD.assaultQueue = PLAYERS.map(p=>p.idx);
+  beginNextAssault();
+}
+function beginNextAssault(){
+  const i = WORLD.assaultQueue[0];
+  if(i===undefined){ endOfRound(); return; }
+  ACTIVE = i; S = PLAYERS[i];
   if(!LAB){
-    $('as-title').textContent = '🔥 Monster Assault — Round '+S.round;
+    $('as-title').textContent = '🔥 Monster Assault — Round '+WORLD.round +
+      (isMP() ? ' — '+S.name : '');
     $('assaultmodal').style.display='flex';
   }
   if(SETTINGS.pyl){ if(!LAB) renderAssault(); }
   else resolveAssaultNow();
+  renderAll();
+}
+function endOfRound(){
+  if(!LAB) $('assaultmodal').style.display='none';
+  if(WORLD.round===3){ finalScore(); return; }
+  WORLD.round++; WORLD.turn=1;
+  startRound();
+  startTurn();
+  log('— Round '+WORLD.round+', Turn 1 —', 'sys', null);
+  if(isMP()){ ACTIVE=0; S=PLAYERS[0]; }
   renderAll();
 }
 function lastStandFlip(){
@@ -1760,7 +2148,9 @@ function renderAssault(){
   const threat = a.base + a.bonusThreat;
   const def = a.def + a.bonusDef;
   let html = `<div class="center"><svg class="emblem big" style="color:var(--danger)"><use href="#fd-horde"/></svg></div>
-    <p class="center">At dusk of Round ${S.round}, the horde descends on the camp.</p>`;
+    <p class="center">At dusk of Round ${WORLD.round}, the horde descends on the camp.</p>`;
+  if(isMP()) html += `<p class="center"><span class="ptag" style="background:${pcolor(ACTIVE).hex}">${S.name}</span>
+    stands to meet it. <span class="note">(${WORLD.assaultQueue.length-1} more to face the horde after this)</span></p>`;
   html += `<p class="center" style="font-size:1.15rem;">🔥 Threat <b style="color:var(--danger)">${threat}</b> &nbsp;vs&nbsp; 🛡 Defense <b style="color:#9fc98f">${def}</b></p>`;
   html += `<div class="threatbar center" style="justify-content:center;">`;
   for(let i=0;i<Math.max(threat,def);i++){
@@ -1788,36 +2178,58 @@ function renderAssault(){
       html += `<p class="center" style="color:#9fc98f; font-size:1.05rem;"><b>The monsters break through — but IRONHIDE turns every blow!</b></p>`;
     }
     $('as-btn').style.display='inline-block';
-    $('as-btn').textContent = S.round===3 ? 'Final Scoring' : 'Continue to Round '+(S.round+1);
+    const more = WORLD.assaultQueue.length > 1;
+    $('as-btn').textContent = more ? '⚔ Next: '+pname(WORLD.assaultQueue[1])
+      : (WORLD.round===3 ? 'Final Scoring' : 'Continue to Round '+(WORLD.round+1));
   }
   $('as-body').innerHTML = html;
 }
 function closeAssault(){
   if(S.assault && !S.assault.resolved) resolveAssaultNow();
   S.assault = null;
-  if(!LAB) $('assaultmodal').style.display='none';
-  if(S.round===3){ finalScore(); return; }
-  S.round++; S.turn=1;
-  startRound();
-  startTurn();
-  log('— Round '+S.round+', Turn 1 —', 'sys');
-  renderAll();
+  WORLD.assaultQueue.shift();
+  beginNextAssault();   // next hero faces the horde, or the round ends
 }
 
 /* ---------- final scoring ---------- */
-function finalScore(){
-  const goldStars = Math.floor(S.gold/4);
-  const fortune = S.fortune + goldStars;
-  const stars = S.glory + S.lore + S.spirit + fortune;
-  const wc = S.cls==='necromancer'?1:2;
-  const total = stars*2 + S.xp - S.wounds*wc;
+
+/* Whoever held the most ground on each contested Adventure board is paid for it at the end.
+   This is what stops the shared boards from being a polite queue. */
+function adventureMajorities(){
+  const out = [];
+  const award = (counts, label, res, icon) => {
+    const best = Math.max(...counts);
+    if(best<=0) return;
+    const winners = counts.map((c,i)=>[c,i]).filter(([c])=>c===best).map(([,i])=>i);
+    const amt = winners.length>1 ? 1 : 2;   // a split majority pays less
+    for(const i of winners){
+      PLAYERS[i][res] += amt;
+      out.push({p:i, label, amt, res, icon, count:best, split:winners.length>1});
+    }
+  };
+  award(thicketHoldings(), 'Most of the Deep Thicket held', 'lore', '🌿');
+  const crypts = PLAYERS.map(()=>0);
+  for(const o of WORLD.cata.visited) if(o!==null && crypts[o]!==undefined) crypts[o]++;
+  award(crypts, 'Most crypts plundered', 'glory', '💀');
+  const towns = PLAYERS.map(()=>0);
+  for(const o of WORLD.routes.towns) if(o!==null && towns[o]!==undefined) towns[o]++;
+  award(towns, 'Most towns in trade', 'fortune', '🏘');
+  return out;
+}
+
+function scoreFor(p){
+  const goldStars = Math.floor(p.gold/4);
+  const fortune = p.fortune + goldStars;
+  const stars = p.glory + p.lore + p.spirit + fortune;
+  const wc = p.cls==='necromancer'?1:2;
+  const total = stars*2 + p.xp - p.wounds*wc;
   const rows = [
-    ['Glory ⭐ ('+S.glory+' × 2)', S.glory*2],
-    ['Lore ⭐ ('+S.lore+' × 2)', S.lore*2],
-    ['Spirit ⭐ ('+S.spirit+' × 2)', S.spirit*2],
-    ['Fortune ⭐ ('+S.fortune+' earned'+(goldStars?(' + '+goldStars+' from gold hoard @4:1'):'')+') × 2', fortune*2],
-    ['Experience (1 pt each)', S.xp],
-    ['Wounds (−'+wc+' pt'+(wc>1?'s':'')+' each'+(S.cls==='necromancer'?', Necromancer':'')+')', -S.wounds*wc],
+    ['Glory ⭐ ('+p.glory+' × 2)', p.glory*2],
+    ['Lore ⭐ ('+p.lore+' × 2)', p.lore*2],
+    ['Spirit ⭐ ('+p.spirit+' × 2)', p.spirit*2],
+    ['Fortune ⭐ ('+p.fortune+' earned'+(goldStars?(' + '+goldStars+' from gold hoard @4:1'):'')+') × 2', fortune*2],
+    ['Experience (1 pt each)', p.xp],
+    ['Wounds (−'+wc+' pt'+(wc>1?'s':'')+' each'+(p.cls==='necromancer'?', Necromancer':'')+')', -p.wounds*wc],
   ];
   let tier='Village Peasant';
   if(total>=25) tier='Wandering Adventurer';
@@ -1825,21 +2237,63 @@ function finalScore(){
   if(total>=55) tier='Champion of Legend';
   if(total>=70) tier='Mythic Slayer';
   if(total>=85) tier='Living Legend';
-  LAB_RESULT = {total, tier, rows};
+  return {total, tier, rows, fortune, wc};
+}
+
+function finalScore(){
+  let majors = [];
+  if(isMP()){
+    majors = adventureMajorities();
+    for(const m of majors){
+      log(m.icon+' '+m.label+' ('+m.count+') — '+pname(m.p)+' takes +'+m.amt+'⭐'+
+          (m.split?' (split)':''), 'good', m.p);
+    }
+  }
+  const results = PLAYERS.map(p=>({p, ...scoreFor(p)}));
+  const me = results[ACTIVE] || results[0];
+  LAB_RESULT = {total:me.total, tier:me.tier, rows:me.rows};
   if(LAB) return;
-  $('final-score').textContent = total + ' points';
-  $('final-tier').textContent = '“'+tier+'”';
-  $('final-table').innerHTML = rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]>=0?'+':''}${r[1]}</td></tr>`).join('')
-    + `<tr><td><b>Total</b></td><td><b>${total}</b></td></tr>`;
+
+  if(!isMP()){
+    $('final-score').textContent = me.total + ' points';
+    $('final-tier').textContent = '“'+me.tier+'”';
+    $('final-table').innerHTML = me.rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]>=0?'+':''}${r[1]}</td></tr>`).join('')
+      + `<tr><td><b>Total</b></td><td><b>${me.total}</b></td></tr>`;
+  } else {
+    const ranked = [...results].sort((a,b)=>b.total-a.total);
+    const top = ranked[0].total;
+    const champs = ranked.filter(r=>r.total===top);
+    $('final-score').innerHTML = champs.length>1
+      ? champs.map(r=>`<span style="color:${pcolor(r.p.idx).soft}">${r.p.name}</span>`).join(' &amp; ') + ' tie at ' + top
+      : `<span style="color:${pcolor(ranked[0].p.idx).soft}">${ranked[0].p.name}</span> wins with ${top}`;
+    $('final-tier').textContent = champs.length>1 ? 'A shared legend.' : '“'+ranked[0].tier+'”';
+    let html = `<tr><th></th><th>Hero</th><th>⭐ Glory</th><th>⭐ Lore</th><th>⭐ Spirit</th><th>⭐ Fortune</th><th>XP</th><th>🩸</th><th>Score</th></tr>`;
+    ranked.forEach((r,i)=>{
+      const c = pcolor(r.p.idx);
+      html += `<tr>
+        <td><b>${i+1}</b></td>
+        <td><span class="ptag" style="background:${c.hex}">${r.p.name}</span> <span class="note">${CLASSES[r.p.cls].icon} ${CLASSES[r.p.cls].name}</span></td>
+        <td>${r.p.glory}</td><td>${r.p.lore}</td><td>${r.p.spirit}</td><td>${r.fortune}</td>
+        <td>${r.p.xp}</td><td>${r.p.wounds}</td>
+        <td><b style="color:${c.soft}">${r.total}</b></td></tr>`;
+    });
+    if(majors.length){
+      html += `<tr><td colspan="9" style="padding-top:10px;"><b style="color:var(--gold)">Adventure board majorities</b></td></tr>`;
+      for(const m of majors)
+        html += `<tr><td></td><td colspan="8">${m.icon} ${m.label} — <span class="ptag" style="background:${pcolor(m.p).hex}">${pname(m.p)}</span> +${m.amt}⭐${m.split?' <span class="note">(split)</span>':''}</td></tr>`;
+    }
+    $('final-table').innerHTML = html;
+  }
   $('overmodal').style.display='flex';
   if(WATCH) return; // spectated bot games are not recorded
   recordGame({
-    ts:Date.now(), cls:S.cls, total, tier, diff:SETTINGS.diff, boards:{...SETTINGS.boards},
+    ts:Date.now(), cls:me.p.cls, total:me.total, tier:me.tier, diff:SETTINGS.diff, boards:{...SETTINGS.boards},
+    players: isMP() ? results.map(r=>({name:r.p.name, cls:r.p.cls, color:r.p.color, total:r.total})) : undefined,
     modules:Object.entries(SETTINGS).filter(([k,v])=>v===true).map(([k])=>k),
-    breakdown:rows,
-    stats:{glory:S.glory, lore:S.lore, spirit:S.spirit, fortune, xp:S.xp, wounds:S.wounds,
-           gold:S.gold, unlocks:S.unlockCount, dungeonRooms:S.dungeonNext},
-    log:[...S.log].reverse(),
+    breakdown:me.rows,
+    stats:{glory:me.p.glory, lore:me.p.lore, spirit:me.p.spirit, fortune:me.fortune, xp:me.p.xp,
+           wounds:me.p.wounds, gold:me.p.gold, unlocks:me.p.unlockCount, dungeonRooms:me.p.dungeonNext},
+    log:[...WORLD.log].reverse(),
   });
   store.del(K_CUR);
 }
@@ -1850,6 +2304,7 @@ function finalScore(){
 function selectRow(i){
   const slot = S.row[i];
   if(S.fill){ log('Finish clearing the Thicket cells first.', 'bad'); return; }
+  if(S.passed){ log('You have already passed this turn.', 'bad'); return; }
   if(!slot || slot.taken) return;
   if(S.spellMode){ spellPickSecond('row', i); return; }
   if(S.active && S.active.source==='row' && S.active.idx===i){ S.active=null; renderAll(); return; }
@@ -1859,6 +2314,7 @@ function selectRow(i){
 }
 function selectHand(i){
   if(S.fill){ log('Finish clearing the Thicket cells first.', 'bad'); return; }
+  if(S.passed){ log('You have already passed this turn.', 'bad'); return; }
   if(!S.hand[i]) return;
   if(S.spellMode){ spellPickSecond('hand', i); return; }
   if(S.active && S.active.source==='hand' && S.active.idx===i){ S.active=null; renderAll(); return; }
@@ -1903,6 +2359,7 @@ function modSuit(s){
 function consumeActive(){
   if(S.active.source==='row'){
     S.row[S.active.idx].taken=true;
+    S.row[S.active.idx].by=ACTIVE;   // the Omen Row is shared — remember who snatched it
     S.discard.push(S.row[S.active.idx].card);
     S.draftsLeft--;
   } else {
@@ -2268,26 +2725,30 @@ function doTavern(){
    NEW ADVENTURE BOARDS
    ================================================================== */
 /* --- Catacombs (rondel movement) --- */
-function cataTarget(){ return (S.cata.pos + activeValue()) % 10; }
+function cataTarget(){ return (S.cataPos + activeValue()) % 10; }
+function cataOpened(i){ return WORLD.cata.visited[i] !== null; }
 function canCata(){
   const c=activeCard();
-  if(SETTINGS.boards.S!=='catacombs') return false;
+  if(!cataOn()) return false;
   if(!c || isFace(c) || activeSuit()!=='S') return false;
-  if(S.cata.visited.every(x=>x)) return false;
-  return !S.cata.visited[cataTarget()];
+  if(WORLD.cata.visited.every(cataOpened_)) return false;
+  return !cataOpened(cataTarget());
 }
+const cataOpened_ = x => x !== null;
 function doCata(){
   if(!canCata()) return;
   const c=activeCard();
   const t=cataTarget();
-  S.cata.pos=t; S.cata.visited[t]=true;
-  log('Catacombs: you step '+activeValue()+' chambers to crypt '+(t+1)+' and pry it open.', 'good');
+  S.cataPos=t;
+  WORLD.cata.visited[t]=ACTIVE;   // claimed, in this hero's colour — gone for everyone else
+  log('Catacombs: '+(isMP()?S.name+' steps':'you step')+' '+activeValue()+' chambers to crypt '+(t+1)+' and pries it open.', 'good');
   gainReward(CATA[t].rw, 'Crypt '+(t+1));
   if(RUNE_SPOTS.catacombs[t]) grantRune(RUNE_SPOTS.catacombs[t]);
   if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
-  if(S.cata.visited.every(x=>x) && !S.cata.done){
-    S.cata.done=true;
-    gainReward(CATA_BONUS, 'The Nameless blesses you');
+  if(WORLD.cata.visited.every(cataOpened_) && !WORLD.cata.done){
+    WORLD.cata.done=true;
+    // the hero who opens the LAST crypt earns the Nameless' blessing
+    gainReward(CATA_BONUS, 'The Nameless blesses you for the final crypt');
   }
   consumeActive(); renderAll();
 }
@@ -2331,17 +2792,18 @@ function chargeLine(i){
 
 /* --- Deep Thicket (spatial clearing) --- */
 function fillCount(v){ return v<=4?1 : v<=9?2 : 3; }
+function thicketTaken(i){ return WORLD.grid[i] !== null; }
 function canThicket(){
   const c=activeCard();
-  if(SETTINGS.boards.C!=='thicket') return false;
+  if(!thicketOn()) return false;
   if(!c || isFace(c) || activeSuit()!=='C') return false;
   if(S.fill) return false;
-  return S.grid.some(x=>!x);
+  return WORLD.grid.some(x=>x===null);
 }
 function doThicketStart(){
   if(!canThicket()) return;
   const c=activeCard();
-  const n=Math.min(fillCount(activeValue()), S.grid.filter(x=>!x).length);
+  const n=Math.min(fillCount(activeValue()), WORLD.grid.filter(x=>x===null).length);
   if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
   consumeActive();
   S.fill={left:n, cells:[]};
@@ -2350,8 +2812,9 @@ function doThicketStart(){
 }
 function thicketLegalCells(){
   const out=[];
+  if(!S.fill) return out;
   for(let i=0;i<16;i++){
-    if(S.grid[i]) continue;
+    if(thicketTaken(i)) continue;
     if(S.fill.cells.length===0){ out.push(i); continue; }
     const r=Math.floor(i/4), c=i%4;
     const adj = S.fill.cells.some(j=>{
@@ -2363,22 +2826,29 @@ function thicketLegalCells(){
   return out;
 }
 function fillThicketCell(i){
-  if(!S.fill || S.grid[i] || !thicketLegalCells().includes(i)) return;
-  S.grid[i]=true;
+  if(!S.fill || thicketTaken(i) || !thicketLegalCells().includes(i)) return;
+  WORLD.grid[i]=ACTIVE;          // this ground is yours
   S.fill.cells.push(i);
   S.fill.left--;
   if(THICKET_RW[i]) gainReward(THICKET_RW[i], 'Clearing');
   if(RUNE_SPOTS.thicket[i]) grantRune(RUNE_SPOTS.thicket[i]);
   const r=Math.floor(i/4);
-  if([0,1,2,3].every(c=>S.grid[r*4+c]) && !S['thicketRow'+r]){
-    S['thicketRow'+r]=true;
+  // whoever lays the last cell of a row takes the Lore for it
+  if([0,1,2,3].every(c=>thicketTaken(r*4+c)) && !WORLD.thicketRows[r]){
+    WORLD.thicketRows[r]=true;
     gainReward({lore:1}, 'Row '+(r+1)+' cleared');
   }
   if(S.fill.left<=0 || thicketLegalCells().length===0){
     S.fill=null;
-    if(S.grid.every(x=>x)) gainReward({lore:1}, 'The Thicket lies open');
+    if(WORLD.grid.every(x=>x!==null)) gainReward({lore:1}, 'The Thicket lies open');
   }
   renderAll();
+}
+// how much of the Thicket each hero holds — used for the end-of-game majority
+function thicketHoldings(){
+  const out = PLAYERS.map(()=>0);
+  for(const o of WORLD.grid) if(o!==null && out[o]!==undefined) out[o]++;
+  return out;
 }
 
 /* --- Standing Stones (rising sums) --- */
@@ -2451,6 +2921,7 @@ function doOracle(guess){
   if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
   consumeActive(); renderAll();
 }
+function resolveProphecyFor(p){ return asPlayer(p, resolveProphecy); }
 function resolveProphecy(){
   const p=S.oracle.pending;
   if(!p || !S.row.length) return;
@@ -2501,31 +2972,39 @@ function doGem(key){
 }
 
 /* --- Trade Roads (network) --- */
-function routeTownsConnected(){ return S.routes.towns.filter(x=>x).length; }
+// towns THIS hero's own network reaches (whether or not they got the payout)
+function routeTownsConnected(){ return S.routeTowns.filter(x=>x).length; }
 function canRoute(i){
   const c=activeCard();
-  if(SETTINGS.boards.D!=='traderoute') return false;
+  if(!routeOn()) return false;
   if(!c || isFace(c) || activeSuit()!=='D') return false;
   const e=ROUTE_EDGES[i];
-  if(S.routes.built[i]) return false;
+  if(WORLD.routes.built[i]!==null) return false;   // someone already owns this road
   if(activeValue()<e.req) return false;
-  if(!S.routes.built.some(x=>x)) return true;
-  return S.routes.towns[e.a] || S.routes.towns[e.b];
+  // your first road may go anywhere; after that it must extend YOUR network
+  if(!S.routeTowns.some(x=>x)) return true;
+  return S.routeTowns[e.a] || S.routeTowns[e.b];
 }
 function doRoute(i){
   if(!canRoute(i)) return;
   const c=activeCard();
   const e=ROUTE_EDGES[i];
-  S.routes.built[i]=true;
-  log('Trade Roads: you lay the road '+ROUTE_TOWNS[e.a].n+' — '+ROUTE_TOWNS[e.b].n+'.', 'good');
+  WORLD.routes.built[i]=ACTIVE;   // the road is laid in your colour
+  log('Trade Roads: '+(isMP()?S.name+' lays':'you lay')+' the road '+ROUTE_TOWNS[e.a].n+' — '+ROUTE_TOWNS[e.b].n+'.', 'good');
   for(const t of [e.a, e.b]){
-    if(!S.routes.towns[t]){
-      S.routes.towns[t]=true;
+    if(S.routeTowns[t]) continue;
+    S.routeTowns[t]=true;
+    const n=routeTownsConnected();
+    if(WORLD.routes.towns[t]===null){
+      // first hero to reach the town takes its trade
+      WORLD.routes.towns[t]=ACTIVE;
       gainReward(ROUTE_TOWNS[t].rw, ROUTE_TOWNS[t].n);
       if(SETTINGS.runes){ const m={1:'gale', 4:'ember', 5:'stone'}; if(m[t]) grantRune(m[t]); }
-      const n=routeTownsConnected();
-      if(ROUTE_STARS[n]) gainReward({fortune:ROUTE_STARS[n]}, n+' towns joined');
+    } else if(isMP()){
+      log('…but '+pname(WORLD.routes.towns[t])+' already holds the trade of '+ROUTE_TOWNS[t].n+' — no payout.', 'bad');
     }
+    // network milestones are personal: they reward the size of YOUR network
+    if(ROUTE_STARS[n]) gainReward({fortune:ROUTE_STARS[n]}, n+' towns joined');
   }
   if(c.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
   consumeActive(); renderAll();
@@ -2541,15 +3020,20 @@ const DIRS_ROOK = [[1,0],[-1,0],[0,1],[0,-1]];
 const DIRS_BISHOP = [[1,1],[1,-1],[-1,1],[-1,-1]];
 const DIRS_QUEEN = DIRS_ROOK.concat(DIRS_BISHOP);
 const KNIGHT_HOPS = [[2,1],[2,-1],[-2,1],[-2,-1],[1,2],[1,-2],[-1,2],[-1,-2]];
-function chessPieceAt(r,c){ return S.chess.pieces.find(p=>p.alive && p.r===r && p.c===c) || null; }
+function chessPieceAt(r,c){ return WORLD.chess.pieces.find(p=>p.alive && p.r===r && p.c===c) || null; }
+// every hero's Champion stands on the same court — they block each other's lines
+function champAt(r,c){
+  const i = PLAYERS.findIndex(p=>p.champ[0]===r && p.champ[1]===c);
+  return i<0 ? null : i;
+}
 function chessOccupied(r,c){
-  if(S.chess.champ[0]===r && S.chess.champ[1]===c) return 'champ';
+  if(champAt(r,c)!==null) return 'champ';
   return chessPieceAt(r,c) ? 'enemy' : null;
 }
 function chessAttacked(excludeKing){
-  // set of "r,c" squares attacked by the living court (lines blocked by any piece or the champion)
+  // set of "r,c" squares attacked by the living court (lines blocked by any piece or a champion)
   const out = new Set();
-  for(const p of S.chess.pieces){
+  for(const p of WORLD.chess.pieces){
     if(!p.alive) continue;
     if(excludeKing && p.t==='K') continue;
     if(p.t==='P'){
@@ -2573,15 +3057,15 @@ function chessAttacked(excludeKing){
   return out;
 }
 function chessKingDefended(){
-  const k = S.chess.pieces.find(p=>p.t==='K' && p.alive);
+  const k = WORLD.chess.pieces.find(p=>p.t==='K' && p.alive);
   if(!k) return false;
   return chessAttacked(true).has(k.r+','+k.c);
 }
 function chessTargets(){
   const c = activeCard();
-  if(!SETTINGS.chess || !c || isFace(c)) return [];
+  if(!chessOn() || !c || isFace(c)) return [];
   const su = activeSuit(); const v = activeValue();
-  const [cr, cc] = S.chess.champ;
+  const [cr, cc] = S.champ;
   const targets = [];
   const addIfLegal = (r,col)=>{
     const occ = chessOccupied(r,col);
@@ -2615,16 +3099,17 @@ function doChessMove(r,c){
   if(!legal) return;
   const card = activeCard();
   const victim = chessPieceAt(r,c);
-  S.chess.champ = [r,c];
+  S.champ = [r,c];
+  const mine = isMP() ? S.name+'’s' : 'your';
   if(victim){
-    victim.alive = false;
-    log('Gambit: your Champion strikes down the '+CHESS_GLYPH[victim.t]+' '+CHESS_NAME[victim.t]+'!', 'good');
+    victim.alive = false;   // the court is shared — each courtier dies exactly once
+    log('Gambit: '+mine+' Champion strikes down the '+CHESS_GLYPH[victim.t]+' '+CHESS_NAME[victim.t]+'!', 'good');
     gainReward(victim.rw, CHESS_NAME[victim.t]);
     S.xp+=1; log('The court takes note: +1 XP.', 'good');
     if(SETTINGS.runes){ const m={B:'tide', N:'stone', K:'ember'}; if(m[victim.t]) grantRune(m[victim.t]); }
-    if(victim.t==='K') log('♚ The Shadow King is toppled — the board is yours!', 'sys');
+    if(victim.t==='K') log('♚ The Shadow King is toppled'+(isMP()?' by '+S.name+' — the glory is theirs alone!':' — the board is yours!'), 'sys');
   } else {
-    log('Gambit: your Champion advances to '+('abcde'[c])+(5-r)+'.', 'lt');
+    log('Gambit: '+mine+' Champion advances to '+('abcde'[c])+(5-r)+'.', 'lt');
   }
   if(card.rank===1){ S.xp+=1; log('Ace bonus: +1 XP.', 'good'); }
   consumeActive(); renderAll();
@@ -2803,6 +3288,13 @@ function useAbility(){
 /* ==================================================================
    RENDERING
    ================================================================== */
+// in multiplayer each suit also has a shared board competing for the same card
+function advHint(){
+  if(!isMP()) return '';
+  const su = activeSuit();
+  const m = {S:'Catacombs', C:'Deep Thicket', D:'Trade Roads'}[su];
+  return m ? ` <span style="color:var(--gold-hi)">or the shared ${m}</span>` : '';
+}
 function cardHTML(c, cls, onclick){
   const s=SUITS[c.suit];
   const face = isFace(c) ? `<div class="face-tag">${c.rank===11?'gold / cards':c.rank===12?'mana / heal / enchant':'rally / guard / decree'}</div>`
@@ -2818,8 +3310,16 @@ function cardHTML(c, cls, onclick){
 }
 
 function renderTop(){
-  $('ui-round').textContent=S.round; $('ui-turn').textContent=S.turn;
-  $('ui-pips').innerHTML = [1,2,3,4,5].map(t=>`<span class="tpip ${t<=S.turn?'on':''}"></span>`).join('');
+  $('ui-round').textContent=WORLD.round; $('ui-turn').textContent=WORLD.turn;
+  $('ui-pips').innerHTML = [1,2,3,4,5].map(t=>`<span class="tpip ${t<=WORLD.turn?'on':''}"></span>`).join('');
+  // the whole personal side of the screen belongs to one hero — say so, loudly
+  const who = $('ui-who');
+  if(isMP()){
+    who.style.display='inline-flex';
+    who.style.background = pcolor(ACTIVE).hex;
+    who.textContent = CLASSES[S.cls].icon+' '+S.name;
+  } else who.style.display='none';
+  document.body.style.setProperty('--pc-active', isMP()?pcolor(ACTIVE).hex:'transparent');
   $('ui-gold').textContent=S.gold; $('ui-mana').textContent=S.mana;
   $('ui-xp').textContent=S.xp; $('ui-wounds').textContent=S.wounds;
   $('ui-def').textContent=totalDefense();
@@ -2839,14 +3339,23 @@ function renderTop(){
 }
 
 function renderRow(){
-  $('omenrow').innerHTML = S.row.map((slot,i)=>{
+  $('omenrow').innerHTML = WORLD.row.map((slot,i)=>{
     const sel = S.active && S.active.source==='row' && S.active.idx===i;
     const spellable = S.spellMode && !slot.taken && !(S.spellFirst.source==='row' && S.spellFirst.idx===i);
-    return cardHTML(slot.card, (slot.taken?'spent ':'')+(sel?'selected ':'')+(spellable?'spelltarget':''), `selectRow(${i})`);
+    const html = cardHTML(slot.card, (slot.taken?'spent ':'')+(sel?'selected ':'')+(spellable?'spelltarget':''), `selectRow(${i})`);
+    // show who took it — the Row is a shared, first-come-first-served draft
+    if(slot.taken && isMP() && slot.by!=null)
+      return html.replace('>', ` style="box-shadow:inset 0 0 0 3px ${pcolor(slot.by).hex};">`);
+    return html;
   }).join('');
+  const btn = $('endturnbtn');
+  btn.textContent = isMP() ? (S.passed ? '✓ Passed' : 'Pass ('+S.name+')') : 'End Turn';
+  btn.disabled = isMP() && S.passed;
   $('draftnote').textContent = S.spellMode
     ? '✨ Choose the second card for the spell…'
-    : (S.draftsLeft>0 ? 'Picks left this turn: '+S.draftsLeft : 'No picks left — play Hero Hand cards or end the turn.');
+    : S.passed ? (isMP() ? S.name+' has passed — waiting on '+PLAYERS.filter(p=>!p.passed).map(p=>p.name).join(', ')+'.' : '')
+    : (S.draftsLeft>0 ? 'Picks left this turn: '+S.draftsLeft
+                      : 'No picks left — play Hero Hand cards, or pass.');
 }
 
 function renderHand(){
@@ -2904,7 +3413,7 @@ function renderActive(){
   b.innerHTML = `
     <div class="modrow" style="align-items:center;">
       <span class="valchip ${s.red?'red':''}">${activeValue()}${s.sym}</span>
-      <span class="note">→ ${SUITS[activeSuit()].name} go to <b>${boardDef(activeSuit()).name}</b>${S.unlocked.tower?' · Tower takes any suit':''}${SETTINGS.chess?' · Gambit takes any suit':''}${S.unlocked.bog&&(activeSuit()==='S'||activeSuit()==='C')?' · Bog':''}${S.unlocked.tavern&&(activeSuit()==='H'||activeSuit()==='D')?' · Tavern':''}</span>
+      <span class="note">→ ${SUITS[activeSuit()].name} go to <b>${boardDef(activeSuit()).name}</b>${advHint()}${S.unlocked.tower?' · Tower takes any suit':''}${chessOn()?' · Gambit takes any suit':''}${S.unlocked.bog&&(activeSuit()==='S'||activeSuit()==='C')?' · Bog':''}${S.unlocked.tavern&&(activeSuit()==='H'||activeSuit()==='D')?' · Tavern':''}</span>
     </div>
     ${aceBtns}
     <div class="modrow">
@@ -3119,26 +3628,38 @@ function renderTavern(){
 }
 
 
+// coloured tokens standing on a shared-board space; the active hero's is starred
+function tokensAt(pred){
+  return PLAYERS.filter(pred).map(p=>
+    `<span class="ptoken" style="background:${pcolor(p.idx).hex}" title="${p.name}">${p.idx===ACTIVE?'★':''}</span>`
+  ).join('');
+}
+function ownerStyle(o){
+  if(o===null || o===undefined) return '';
+  const c = pcolor(o);
+  return `background:${c.hex}; border-color:${c.hex}; color:${c.ink};`;
+}
 function renderCata(){
-  if(SETTINGS.boards.S!=='catacombs') return;
+  if(!cataOn()) return;
   const legalT = canCata()? cataTarget() : -1;
   $('cata-ring').innerHTML = '<div style="display:grid; grid-template-columns:repeat(5,1fr); gap:8px;">' +
     CATA.map((ch,i)=>{
-      const here = S.cata.pos===i;
-      const done = S.cata.visited[i];
+      const owner = WORLD.cata.visited[i];
+      const done = owner!==null;
       const legal = i===legalT;
-      return `<div class="slot room ${done?'done':''} ${legal?'legal':''}" onclick="${legal?'doCata()':''}" style="min-height:78px;">
-        ${here?'<div style="position:absolute;top:2px;right:4px;">🧍</div>':''}
+      const toks = tokensAt(p=>p.cataPos===i);
+      return `<div class="slot room ${done?'done':''} ${legal?'legal':''}" onclick="${legal?'doCata()':''}" style="min-height:78px; ${done?ownerStyle(owner):''}">
+        ${toks?`<div class="tokrow">${toks}</div>`:''}
         ${done?'<div class="mark">✗</div>':''}
         <div class="remoji">${ch.em}</div>
         <div class="rname">Crypt ${i+1}</div>
         <div class="rw">${rwText(ch.rw)} ${runeIcon('catacombs',i)}</div>
       </div>`;
     }).join('') + '</div>';
-  $('cata-rule').innerHTML = S.cata.visited.every(x=>x)
+  $('cata-rule').innerHTML = WORLD.cata.visited.every(cataOpened_)
     ? 'Every crypt stands open — the Nameless is pleased.'
-    : (S.cata.pos<0 ? 'You stand at the entrance (before Crypt 1). A value of v lands on Crypt v.' :
-       'You stand at Crypt '+(S.cata.pos+1)+'. Move exactly your card\u2019s value clockwise; the ring wraps. Opening all 10: '+rwText(CATA_BONUS)+'.');
+    : (S.cataPos<0 ? (isMP()?S.name+' stands':'You stand')+' at the entrance (before Crypt 1). A value of v lands on Crypt v.' :
+       (isMP()?S.name+' stands':'You stand')+' at Crypt '+(S.cataPos+1)+'. Move exactly your card\u2019s value clockwise; the ring wraps. Opening all 10: '+rwText(CATA_BONUS)+'.');
   $('cata-glory').innerHTML = starStr(S.glory);
 }
 
@@ -3162,12 +3683,13 @@ function renderWar(){
 }
 
 function renderThicket(){
-  if(SETTINGS.boards.C!=='thicket') return;
+  if(!thicketOn()) return;
   const legalCells = S.fill? thicketLegalCells() : [];
   $('thicket-grid').innerHTML = '<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px; max-width:320px; margin:0 auto;">' +
-    S.grid.map((filled,i)=>{
+    WORLD.grid.map((owner,i)=>{
+      const filled = owner!==null;
       const legal=legalCells.includes(i);
-      return `<div class="slot ${filled?'done':''} ${legal?'legal':''}" style="min-height:56px; display:flex; flex-direction:column; align-items:center; justify-content:center;" onclick="${legal?`fillThicketCell(${i})`:''}">
+      return `<div class="slot ${filled?'done':''} ${legal?'legal':''}" style="min-height:56px; display:flex; flex-direction:column; align-items:center; justify-content:center; ${filled?ownerStyle(owner):''}" onclick="${legal?`fillThicketCell(${i})`:''}">
         ${filled?'<span class="mark" style="position:static; font-size:1.2rem;">🌿</span>':''}
         <div class="rw">${THICKET_RW[i]?rwText(THICKET_RW[i]):''} ${runeIcon('thicket',i)}</div>
       </div>`;
@@ -3178,10 +3700,14 @@ function renderThicket(){
     $('thicket-grid').firstChild && $('thicket-grid').firstChild.classList.add('legal');
     $('thicket-grid').firstChild && ($('thicket-grid').firstChild.style.cursor='pointer');
   }
-  $('thicket-rule').innerHTML = S.fill
+  const held = isMP()
+    ? ' · ground held: ' + thicketHoldings().map((n,i)=>
+        `<span class="ptag" style="background:${pcolor(i).hex}">${pname(i)} ${n}</span>`).join(' ')
+    : '';
+  $('thicket-rule').innerHTML = (S.fill
     ? '<b>Clear '+S.fill.left+' more cell'+(S.fill.left>1?'s':'')+'</b> — each must touch a cell cleared this action.'
-    : (canThicket()? 'This club clears <b>'+Math.min(fillCount(activeValue()), S.grid.filter(x=>!x).length)+'</b> cells — click the board to begin.'
-                   : 'A club of 1–4 clears 1 cell · 5–9 clears 2 · 10–13 clears 3. Rows pay 1⭐; the full grid pays 1⭐ more.');
+    : (canThicket()? 'This club clears <b>'+Math.min(fillCount(activeValue()), WORLD.grid.filter(x=>x===null).length)+'</b> cells — click the board to begin.'
+                   : 'A club of 1–4 clears 1 cell · 5–9 clears 2 · 10–13 clears 3. Rows pay 1⭐ to whoever finishes them.')) + held;
   $('thicket-lore').innerHTML = starStr(S.lore);
 }
 function canThicketClick(){ return canThicket(); }
@@ -3267,32 +3793,40 @@ function renderGems(){
 }
 
 function renderRoute(){
-  if(SETTINGS.boards.D!=='traderoute') return;
+  if(!routeOn()) return;
   const W=300, H=150;
   let svg = `<svg viewBox="0 0 ${W} ${H}" style="width:100%; max-width:520px; display:block; margin:0 auto;">`;
   ROUTE_EDGES.forEach((e,i)=>{
     const A=ROUTE_TOWNS[e.a], B=ROUTE_TOWNS[e.b];
-    const built=S.routes.built[i];
+    const owner=WORLD.routes.built[i];
+    const built=owner!==null;
+    const col = built ? pcolor(owner).hex : null;
     const legal=canRoute(i);
     const mx=(A.x+B.x)/2, my=(A.y+B.y)/2;
     svg += `<line x1="${A.x}" y1="${A.y}" x2="${B.x}" y2="${B.y}"
-      stroke="${built?'var(--marker2)':(legal?'var(--marker)':'var(--ink-soft)')}"
+      stroke="${built?col:(legal?'var(--marker)':'var(--ink-soft)')}"
       stroke-width="${built?5:(legal?6:3)}" ${built?'':'stroke-dasharray="6 5"'}
       ${legal?`style="cursor:pointer;" onclick="doRoute(${i})"`:''} stroke-linecap="round"/>`;
     svg += `<g ${legal?`style="cursor:pointer;" onclick="doRoute(${i})"`:''}>
-      <circle cx="${mx}" cy="${my}" r="9" fill="${built?'var(--marker2)':'var(--parch)'}" stroke="${legal?'var(--marker)':'var(--ink-soft)'}" stroke-width="${legal?3:1.5}"/>
+      <circle cx="${mx}" cy="${my}" r="9" fill="${built?col:'var(--parch)'}" stroke="${legal?'var(--marker)':'var(--ink-soft)'}" stroke-width="${legal?3:1.5}"/>
       <text x="${mx}" y="${my+3.5}" text-anchor="middle" font-size="10" font-weight="bold" fill="${built?'#fff':'var(--ink)'}">${built?'✓':e.req}</text></g>`;
   });
   ROUTE_TOWNS.forEach((t,i)=>{
-    const on=S.routes.towns[i];
-    svg += `<circle cx="${t.x}" cy="${t.y}" r="12" fill="${on?'var(--gold)':'var(--parch)'}" stroke="var(--ink)" stroke-width="2"/>
+    const owner=WORLD.routes.towns[i];        // who holds the trade
+    const on=owner!==null;
+    const mine=S.routeTowns[i];               // whether MY network reaches it
+    const fill = on ? pcolor(owner).hex : 'var(--parch)';
+    svg += `<circle cx="${t.x}" cy="${t.y}" r="12" fill="${fill}" stroke="${mine?'var(--gold-hi)':'var(--ink)'}" stroke-width="${mine?3.5:2}"/>
       <text x="${t.x}" y="${t.y-16}" text-anchor="middle" font-size="10" font-weight="bold" fill="var(--ink)">${t.n}</text>
       <text x="${t.x}" y="${t.y+26}" text-anchor="middle" font-size="8.5" fill="var(--ink-soft)">${rwText(t.rw)}</text>`;
   });
   svg += '</svg>';
   $('route-map').innerHTML = svg;
   const n=routeTownsConnected();
-  $('route-rule').innerHTML = 'Towns joined: <b class="marker">'+n+'</b> · milestones: 3rd/4th/5th town +1⭐ each, 6th +2⭐. Road numbers show the minimum diamond value.';
+  $('route-rule').innerHTML = 'Your network reaches <b class="marker">'+n+'</b> town'+(n===1?'':'s')+
+    ' <span class="note">(gold ring)</span> · milestones: 3rd/4th/5th town +1⭐ each, 6th +2⭐.' +
+    (isMP() ? ' A town pays only the <b>first</b> hero to reach it — its colour shows who holds the trade.'
+            : ' Road numbers show the minimum diamond value.');
   $('route-fortune').innerHTML = starStr(S.fortune);
 }
 
@@ -3318,23 +3852,24 @@ function renderRunes(){
 }
 
 function renderChess(){
-  if(!SETTINGS.chess) return;
+  if(!chessOn()) return;
   const targets = chessTargets();
   const isT = (r,c)=>targets.some(([tr,tc])=>tr===r&&tc===c);
   const attacked = chessAttacked(false);
   let html='';
   for(let r=0;r<5;r++) for(let c=0;c<5;c++){
     const p=chessPieceAt(r,c);
-    const champ = S.chess.champ[0]===r && S.chess.champ[1]===c;
+    const ch=champAt(r,c);                 // which hero's Champion stands here, if any
     const legal=isT(r,c);
     html += `<div class="csq ${(r+c)%2?'dark':'light'} ${legal?'clegal':''}" onclick="${legal?`doChessMove(${r},${c})`:''}">
       ${attacked.has(r+','+c)?'<span class="cattack" title="attacked by the court"></span>':''}
-      ${champ?'<span class="champ">♘</span>': p?CHESS_GLYPH[p.t]:''}
+      ${ch!==null?`<span class="champ" style="color:${pcolor(ch).hex}; ${ch===ACTIVE?'text-shadow:0 0 6px var(--gold-hi);':'opacity:.75;'}" title="${pname(ch)}">♘</span>`
+                : p?CHESS_GLYPH[p.t]:''}
       ${p?`<span class="crw">${rwText(p.rw)}</span>`:''}
     </div>`;
   }
   $('chess-grid').innerHTML=html;
-  const king = S.chess.pieces.find(p=>p.t==='K');
+  const king = WORLD.chess.pieces.find(p=>p.t==='K');
   $('chess-rule').innerHTML = !king.alive
     ? 'The Shadow King has fallen. The survivors still lash out — and can still be hunted.'
     : (chessKingDefended()
@@ -3343,11 +3878,37 @@ function renderChess(){
 }
 
 function renderLog(){
-  $('logwrap').innerHTML = S.log.slice(0,80).map(l=>`<div class="${l.cls}">${l.msg}</div>`).join('');
+  $('logwrap').innerHTML = WORLD.log.slice(0,80).map(l=>{
+    const tag = (l.p!=null && PLAYERS[l.p])
+      ? `<span class="ptag" style="background:${pcolor(l.p).hex}">${pname(l.p)}</span> ` : '';
+    return `<div class="${l.cls}">${tag}${l.msg}</div>`;
+  }).join('');
+}
+
+/* The player strip: everyone's standing, always visible. Click a hero to take the table.
+   This is the whole "simultaneous" affordance — nobody is locked out waiting their turn. */
+function renderPlayers(){
+  if(!isMP()){ $('playerbar').style.display='none'; return; }
+  $('playerbar').style.display='flex';
+  $('playerbar').innerHTML = PLAYERS.map(p=>{
+    const c = pcolor(p.idx);
+    const sc = scoreFor(p).total;
+    const on = p.idx===ACTIVE;
+    return `<div class="ptab ${on?'on':''} ${p.passed?'passed':''}" style="--pc:${c.hex}"
+         onclick="setActive(${p.idx})" title="${CLASSES[p.cls].name}">
+      <span class="pdot" style="background:${c.hex}"></span>
+      <span class="pnm">${CLASSES[p.cls].icon} ${p.name}</span>
+      <span class="psc">${sc}</span>
+      <span class="ppk">${p.passed ? '✓ passed' : '🎴 '+p.draftsLeft+' pick'+(p.draftsLeft===1?'':'s')}</span>
+      <span class="pwd">🩸${p.wounds} 🛡${asPlayer(p,totalDefense)}</span>
+    </div>`;
+  }).join('');
 }
 
 function renderAll(){
   if(LAB) return;
+  syncBoards();
+  renderPlayers();
   renderTop(); renderRow(); renderHand(); renderActive();
   renderDungeon(); renderForest(); renderTemple(); renderMarket();
   renderGuild(); renderAttrs(); renderFollowers();
@@ -3463,7 +4024,7 @@ function labOptions(pol){
   }
   for(let i=0;i<ROUTE_EDGES.length;i++) if(canRoute(i)){
     const e=ROUTE_EDGES[i];
-    const newTowns=(S.routes.towns[e.a]?0:1)+(S.routes.towns[e.b]?0:1);
+    const newTowns=(S.routeTowns[e.a]?0:1)+(S.routeTowns[e.b]?0:1);
     out.push({cat:'traderoute', est:.4+newTowns*1.1, run:((j)=>()=>doRoute(j))(i)});
   }
   if(canTower()) out.push({cat:'tower', est:labEst(TOWER_FLOORS[S.tower.length].rw), run:doTower});
@@ -3612,7 +4173,7 @@ function labPlayGame(cls, settings, pol, M){
   M.runesGot+=S.runes.ember+S.runes.tide+S.runes.gale+S.runes.stone;
   M.captures+=S.chess.pieces.filter(p=>!p.alive).length;
   M.complete.dungeon+=S.dungeonNext; M.complete.trail+=S.trail.length;
-  M.complete.towns+=S.routes.towns.filter(x=>x).length;
+  M.complete.towns+=S.routeTowns.filter(x=>x).length;
 }
 
 function labNewMetrics(){
